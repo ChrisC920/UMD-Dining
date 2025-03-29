@@ -31,7 +31,7 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
     DiningFetchAllFoods event,
     Emitter<DiningState> emit,
   ) async {
-    final res = await _getAllFoods(NoParams());
+    final res = await _getAllFoods(GetDatabaseParams(database: event.database));
 
     res.fold(
       (l) => emit(DiningFailure(l.message)),

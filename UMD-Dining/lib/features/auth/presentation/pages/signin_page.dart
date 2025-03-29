@@ -80,7 +80,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                           // showSnackBar(context, state.message);
                         } else if (state is AuthSuccess) {
                           // Future.delayed(const Duration(seconds: 6), () {
-                          // _updateCurrentPageIndex(1);
+                          //   _updateCurrentPageIndex(1);
                           // });
 
                           Navigator.pushAndRemoveUntil(
