@@ -3,7 +3,9 @@ import 'package:umd_dining_refactor/features/dining/data/models/dining_model.dar
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 abstract interface class DiningRemoteDataSource {
-  Future<List<DiningModel>> getAllFoods();
+  Future<List<DiningModel>> getAllFoods({
+    required String database,
+  });
   Future<DiningModel> getFood({
     required String name,
   });
@@ -37,9 +39,9 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
   DiningRemoteDataSourceImpl(this.supabaseClient);
 
   @override
-  Future<List<DiningModel>> getAllFoods() async {
+  Future<List<DiningModel>> getAllFoods({required String database}) async {
     try {
-      final foods = await supabaseClient.from('food_modified').select('*');
+      final foods = await supabaseClient.from(database).select('*');
       return foods
           .map(
             (food) => DiningModel.fromJson(food).copyWith(

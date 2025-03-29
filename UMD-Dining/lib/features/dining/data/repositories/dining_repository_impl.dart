@@ -18,13 +18,15 @@ class DiningRepositoryImpl implements DiningRepository {
   );
 
   @override
-  Future<Either<Failure, List<Dining>>> getAllFoods() async {
+  Future<Either<Failure, List<Dining>>> getAllFoods(
+      {required String database}) async {
     try {
       if (!await (connectionChecker.isConnected)) {
         return left(Failure(Constants.noConnectionErrorMessage));
       }
 
-      final foods = await diningRemoteDataSource.getAllFoods();
+      final foods =
+          await diningRemoteDataSource.getAllFoods(database: database);
       return right(foods);
     } on ServerException catch (e) {
       return left(Failure(e.message));
