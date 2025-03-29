@@ -13,39 +13,11 @@ class Constants {
     'Brunch',
   ];
 
-  static List<GButton> getNavigations() {
-    List<GButton> navigations = [];
-
-    navigations.add(
-      const GButton(
-        icon: Icons.home,
-        text: "Home",
-      ),
-    );
-
-    navigations.add(
-      const GButton(
-        icon: Icons.favorite,
-        text: "Favorites",
-      ),
-    );
-
-    navigations.add(
-      const GButton(
-        icon: Icons.search,
-        text: "Browse",
-      ),
-    );
-
-    navigations.add(
-      const GButton(
-        icon: Icons.person_2_outlined,
-        text: "Profile",
-      ),
-    );
-
-    return navigations;
-  }
+  static const List<String> databases = [
+    'food_modified',
+    'food_today',
+    'food',
+  ];
 
   static const List<MovingCircle> movingCircles = [
     MovingCircle(

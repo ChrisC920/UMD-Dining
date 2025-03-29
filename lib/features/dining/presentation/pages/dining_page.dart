@@ -31,8 +31,7 @@ class _DiningPageState extends State<DiningPage> {
   List<Dining> items = [];
   List<Dining> searchHistory = [];
   List<String> selectedMealTypes = [];
-  List<GButton> navigations = Constants.getNavigations();
-  int currentPageIndex = 0;
+  int currentPageIndex = 1;
 
   @override
   void initState() {
@@ -41,6 +40,9 @@ class _DiningPageState extends State<DiningPage> {
           diningHall: diningHall,
           mealType: selectedMealTypes,
         ));
+    setState(() {
+      currentPageIndex = 1;
+    });
     _searchController.addListener(queryListener);
   }
 
@@ -64,41 +66,40 @@ class _DiningPageState extends State<DiningPage> {
     search(_searchController.text, selectedMealTypes);
   }
 
+  void updatePage(int index) {
+    setState(() {
+      currentPageIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.black,
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 20,
-              color: Colors.black.withOpacity(.1),
-            )
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
-            child: GNav(
-              backgroundColor: Colors.black,
-              color: Colors.white,
-              activeColor: Colors.white,
-              tabBackgroundColor: Colors.grey.shade800,
-              gap: 8,
-              iconSize: 24,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              haptic: true,
-              tabs: navigations,
-              selectedIndex: currentPageIndex,
-              onTabChange: (index) {
-                setState(() {
-                  currentPageIndex = index;
-                });
-              },
-            ),
+      bottomNavigationBar: NavigationBar(
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+        onDestinationSelected: updatePage,
+        indicatorColor: Colors.transparent, // Transparent background
+        indicatorShape: const CircleBorder(),
+        selectedIndex: currentPageIndex,
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home,
+                size: 28, color: Colors.grey), // Unselected
+            selectedIcon: Icon(Icons.home,
+                size: 32, color: Colors.red[200]), // Selected icon color
+            label: 'Home',
           ),
-        ),
+          NavigationDestination(
+            icon: const Icon(Icons.search, size: 28, color: Colors.grey),
+            selectedIcon: Icon(Icons.search, size: 32, color: Colors.red[200]),
+            label: 'Search',
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.favorite, size: 28, color: Colors.grey),
+            selectedIcon: Icon(Icons.abc, size: 32, color: Colors.red[200]),
+            label: 'Favorites',
+          ),
+        ],
       ),
       appBar: AppBar(
         title: const Text(
@@ -113,7 +114,7 @@ class _DiningPageState extends State<DiningPage> {
             padding: const EdgeInsets.only(right: 12),
             child: IconButton(
               icon: const Icon(
-                Icons.search,
+                Icons.person,
                 size: 24,
                 weight: 24,
               ),
@@ -124,6 +125,13 @@ class _DiningPageState extends State<DiningPage> {
       ),
       body: SafeArea(
         child: <Widget>[
+          Center(
+            child: Container(
+              width: 100,
+              height: 100,
+              color: Colors.green,
+            ),
+          ),
           BlocConsumer<DiningBloc, DiningState>(
             listener: (context, state) {
               if (state is DiningFailure) {
@@ -175,27 +183,31 @@ class _DiningPageState extends State<DiningPage> {
               );
             },
           ),
-          Center(
-            child: Container(
-              width: 100,
-              height: 100,
-              color: Colors.green,
-            ),
-          ),
           Container(
             width: 100,
             height: 100,
             color: Colors.blue,
           ),
-          Center(
-            child: Container(
-              width: 100,
-              height: 100,
-              color: Colors.green,
-            ),
-          ),
         ][currentPageIndex],
       ),
+    );
+  }
+
+  NavigationDestination _buildNavItem({
+    required IconData icon,
+    required IconData selectedIcon,
+  }) {
+    return NavigationDestination(
+      icon: Icon(icon),
+      selectedIcon: Container(
+        padding: const EdgeInsets.all(8.0),
+        decoration: const BoxDecoration(
+          color: Colors.blue, // Circular background color when selected
+          shape: BoxShape.circle,
+        ),
+        child: Icon(selectedIcon, color: Colors.white),
+      ),
+      label: '', // Hide label
     );
   }
 

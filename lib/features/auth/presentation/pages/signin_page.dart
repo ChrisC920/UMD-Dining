@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +10,10 @@ import 'package:umd_dining_refactor/core/common/widgets/loader.dart';
 import 'package:umd_dining_refactor/core/constants/constants.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/pages/onboarding_page.dart';
-import 'package:umd_dining_refactor/features/auth/presentation/widgets/background_card.dart';
+import 'package:umd_dining_refactor/features/auth/presentation/widgets/apple_sign_in_button.dart';
+import 'package:umd_dining_refactor/features/auth/presentation/widgets/google_sign_in_button.dart';
+import 'package:umd_dining_refactor/features/auth/presentation/widgets/horizontal_scroll.dart';
+import 'package:umd_dining_refactor/features/dining/presentation/pages/start_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SignInPage extends StatefulWidget {
@@ -59,8 +64,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
           fit: StackFit.expand,
           children: [
             BackgroundCard(
-              currentPageIndex: _currentPageIndex,
-            ),
+                currentPageIndex: 0, onPageUpdate: _updateCurrentPageIndex),
             IgnorePointer(
               child: PageView(
                 physics: const NeverScrollableScrollPhysics(),
@@ -75,15 +79,15 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                         if (state is AuthFailure) {
                           // showSnackBar(context, state.message);
                         } else if (state is AuthSuccess) {
-                          Future.delayed(const Duration(seconds: 6), () {
-                            _updateCurrentPageIndex(1);
-                          });
+                          // Future.delayed(const Duration(seconds: 6), () {
+                          // _updateCurrentPageIndex(1);
+                          // });
 
-                          // Navigator.pushAndRemoveUntil(
-                          //   context,
-                          //   StartPage.route(),
-                          //   (route) => false,
-                          // );
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            StartPage.route(),
+                            (route) => false,
+                          );
                         }
                       },
                       builder: (context, state) {
@@ -254,146 +258,146 @@ class TermsAndConditionsText extends StatelessWidget {
   }
 }
 
-// class BackgroundCard extends StatelessWidget {
-//   const BackgroundCard({
-//     super.key,
-//     required this.currentPageIndex,
-//     required this.onPageUpdate,
-//   });
+class BackgroundCard extends StatelessWidget {
+  const BackgroundCard({
+    super.key,
+    required this.currentPageIndex,
+    required this.onPageUpdate,
+  });
 
-//   final double currentPageIndex;
-//   final void Function(int) onPageUpdate;
+  final double currentPageIndex;
+  final void Function(int) onPageUpdate;
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: EdgeInsets.only(
-//         top: (currentPageIndex <= 1.6 ? 650 - currentPageIndex * 400 : 0),
-//         // top: currentPageIndex <= 1 ? 650 - currentPageIndex * 400 : 250,
-//       ),
-//       child: Stack(
-//         children: [
-//           ClipRRect(
-//             borderRadius: const BorderRadius.only(
-//               topLeft: Radius.circular(45),
-//               topRight: Radius.circular(45),
-//             ),
-//             child: BackdropFilter(
-//               filter: ImageFilter.blur(
-//                   sigmaX: 100.0, sigmaY: 100.0), // Adjust blur strength
-//               child: Container(
-//                 // height: double.infinity,
-//                 decoration: BoxDecoration(
-//                   color: Colors.red.shade400
-//                       .withOpacity(0.3), // Adjust opacity for the glass effect
-//                   borderRadius: const BorderRadius.only(
-//                     topLeft: Radius.circular(45),
-//                     topRight: Radius.circular(45),
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ),
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        top: (currentPageIndex <= 1.6 ? 650 - currentPageIndex * 400 : 0),
+        // top: currentPageIndex <= 1 ? 650 - currentPageIndex * 400 : 250,
+      ),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(45),
+              topRight: Radius.circular(45),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(
+                  sigmaX: 100.0, sigmaY: 100.0), // Adjust blur strength
+              child: Container(
+                // height: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.red.shade400
+                      .withOpacity(0.3), // Adjust opacity for the glass effect
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(45),
+                    topRight: Radius.circular(45),
+                  ),
+                ),
+              ),
+            ),
+          ),
 
-//           // Only show sign-in buttons when currentPageIndex is 0
-//           if (currentPageIndex == 0)
-//             const AnimatedOpacity(
-//               opacity: 1,
-//               duration: Duration(milliseconds: 500),
-//               curve: Curves.easeOutQuart,
-//               child: Column(
-//                 children: [
-//                   SizedBox(height: 30),
-//                   GoogleSignInButton(),
-//                   SizedBox(height: 15),
-//                   AppleSignInButton(),
-//                   TermsAndConditionsText(),
-//                   SizedBox(height: 0),
-//                 ],
-//               ),
-//             ),
+          // Only show sign-in buttons when currentPageIndex is 0
+          if (currentPageIndex == 0)
+            const AnimatedOpacity(
+              opacity: 1,
+              duration: Duration(milliseconds: 500),
+              curve: Curves.easeOutQuart,
+              child: Column(
+                children: [
+                  SizedBox(height: 30),
+                  GoogleSignInButton(),
+                  SizedBox(height: 15),
+                  AppleSignInButton(),
+                  TermsAndConditionsText(),
+                  SizedBox(height: 0),
+                ],
+              ),
+            ),
 
-//           // Show page 1 content when currentPageIndex is 1
-//           if (currentPageIndex >= 1 && currentPageIndex < 2)
-//             AnimatedOpacity(
-//               opacity: 2 - currentPageIndex,
-//               duration: const Duration(milliseconds: 300),
-//               curve: Curves.easeOutQuart,
-//               child: Column(
-//                 children: [
-//                   const Padding(
-//                     padding: EdgeInsets.only(top: 40.0),
-//                     child: Text(
-//                       "Enter your age",
-//                       style: TextStyle(
-//                         fontSize: 50,
-//                         fontWeight: FontWeight.bold,
-//                         fontFamily: 'Helvetica',
-//                         letterSpacing: 0.1,
-//                         color: Colors.black,
-//                       ),
-//                     ),
-//                   ),
-//                   const Expanded(
-//                     child: Column(
-//                       children: [
-//                         Icon(Icons.arrow_drop_down,
-//                             size: 100, color: Color.fromARGB(255, 56, 56, 56)),
-//                         Center(
-//                           child: HorizontalScroll(),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                   const SizedBox(height: 80),
-//                   Padding(
-//                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
-//                     child: ElevatedButton(
-//                       style: ElevatedButton.styleFrom(
-//                         minimumSize: const Size.fromHeight(75),
-//                         backgroundColor: const Color.fromARGB(142, 0, 24, 57),
-//                         shape: RoundedRectangleBorder(
-//                             borderRadius: BorderRadius.circular(24)),
-//                       ),
-//                       onPressed: () => onPageUpdate(2),
-//                       child: const Row(
-//                         mainAxisAlignment: MainAxisAlignment.center,
-//                         children: [
-//                           Text(
-//                             "Continue",
-//                             style: TextStyle(
-//                               color: Colors.white,
-//                               fontWeight: FontWeight.bold,
-//                               fontSize: 22,
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                   ),
-//                   const SizedBox(height: 70),
-//                 ],
-//               ),
-//             ),
+          // Show page 1 content when currentPageIndex is 1
+          if (currentPageIndex >= 1 && currentPageIndex < 2)
+            AnimatedOpacity(
+              opacity: 2 - currentPageIndex,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutQuart,
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(top: 40.0),
+                    child: Text(
+                      "Enter your age",
+                      style: TextStyle(
+                        fontSize: 50,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Helvetica',
+                        letterSpacing: 0.1,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const Expanded(
+                    child: Column(
+                      children: [
+                        Icon(Icons.arrow_drop_down,
+                            size: 100, color: Color.fromARGB(255, 56, 56, 56)),
+                        Center(
+                          child: HorizontalScroll(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 80),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(75),
+                        backgroundColor: const Color.fromARGB(142, 0, 24, 57),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24)),
+                      ),
+                      onPressed: () => onPageUpdate(2),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Continue",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 70),
+                ],
+              ),
+            ),
 
-//           if (currentPageIndex >= 2 && currentPageIndex < 3)
-//             AnimatedOpacity(
-//               opacity: 3 - currentPageIndex,
-//               duration: const Duration(milliseconds: 300),
-//               curve: Curves.easeOutQuart,
-//               child: Column(
-//                 children: [
-//                   const SizedBox(height: 30),
-//                   ElevatedButton(
-//                       onPressed: () => onPageUpdate(1),
-//                       child: Container(
-//                         child: const Text("TEMP"),
-//                       ))
-//                 ],
-//               ),
-//             ),
-//         ],
-//       ),
-//     );
-//   }
-// }
+          if (currentPageIndex >= 2 && currentPageIndex < 3)
+            AnimatedOpacity(
+              opacity: 3 - currentPageIndex,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutQuart,
+              child: Column(
+                children: [
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                      onPressed: () => onPageUpdate(1),
+                      child: Container(
+                        child: const Text("TEMP"),
+                      ))
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}

@@ -3,7 +3,7 @@ import 'package:umd_dining_refactor/features/dining/domain/entities/dining.dart'
 import 'package:fpdart/fpdart.dart';
 
 abstract interface class DiningRepository {
-  Future<Either<Failure, List<Dining>>> getAllFoods();
+  Future<Either<Failure, List<Dining>>> getAllFoods({required String database});
   Future<Either<Failure, Dining>> getFood({required String name});
   Future<Either<Failure, List<Dining>>> getFoodQuery({
     int? id,

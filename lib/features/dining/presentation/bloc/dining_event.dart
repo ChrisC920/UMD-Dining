@@ -3,7 +3,13 @@ part of 'dining_bloc.dart';
 @immutable
 sealed class DiningEvent {}
 
-final class DiningFetchAllFoods extends DiningEvent {}
+final class DiningFetchAllFoods extends DiningEvent {
+  final String database;
+
+  DiningFetchAllFoods({
+    required this.database,
+  });
+}
 
 final class DiningFetchFood extends DiningEvent {
   final String name;
