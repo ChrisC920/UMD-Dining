@@ -26,11 +26,14 @@ class AuthRepositoryImpl implements AuthRepository {
           return left(Failure('User not logged in!'));
         }
 
+        final userExists = await _checkIfUserExists(session.user.id);
+
         return right(
           UserModel(
             id: session.user.id,
             email: session.user.email ?? '',
             name: '',
+            isNewUser: !userExists,
           ),
         );
       }
@@ -76,7 +79,12 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, User>> loginWithGoogleOAuth() async {
     return _getUser(
-      () async => await remoteDataSource.loginWithGoogleOAuth(),
+      () async {
+        final user = await remoteDataSource.loginWithGoogleOAuth();
+        final isNewUser = await _checkIfUserExists(user.id);
+
+        return user.copyWith(isNewUser: isNewUser);
+      },
     );
   }
 
@@ -100,5 +108,15 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return left(Failure(e.message));
     }
+  }
+
+  Future<bool> _checkIfUserExists(String userId) async {
+    final response = await Constants.supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .maybeSingle();
+
+    return response != null; // If null, user does not exist
   }
 }

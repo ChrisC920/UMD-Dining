@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_moving_background/enums/animation_types.dart';
+import 'package:flutter_moving_background/flutter_moving_background.dart';
+import 'package:umd_dining_refactor/core/constants/constants.dart';
 
 class OnboardingPage extends StatefulWidget {
+  static route() => MaterialPageRoute(
+        builder: (context) => const OnboardingPage(),
+      );
   const OnboardingPage({super.key});
 
   @override
@@ -8,81 +14,88 @@ class OnboardingPage extends StatefulWidget {
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  void _nextPage() {
+    if (_currentPage < 2) {
+      setState(() {
+        _currentPage++;
+        _pageController.animateToPage(
+          _currentPage,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      });
+    }
+  }
+
+  void _prevPage() {
+    if (_currentPage > 0) {
+      setState(() {
+        _currentPage--;
+        _pageController.animateToPage(
+          _currentPage,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      });
+    }
+  }
+
+  void _updateCurrentPageIndex(int index) {
+    setState(() {
+      _currentPage = index;
+      _pageController.animateToPage(
+        _currentPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 110),
-          const Padding(
-            padding: EdgeInsets.only(
-              left: 21,
-            ),
-            child: Text(
-              'Let\'s Get Started',
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                height: 1.2,
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Helvetica',
-                letterSpacing: 0.1,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.only(left: 21, right: 40),
-            child: RichText(
-              text: const TextSpan(
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
-                children: [
-                  TextSpan(
-                      text:
-                          'We just need a few more things to cater your experience!')
+      body: MovingBackground(
+        animationType: AnimationType.rain,
+        backgroundColor: Colors.grey.shade100,
+        circles: Constants.movingCircles,
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
+                children: const [
+                  Center(child: Text("Page 1", style: TextStyle(fontSize: 24))),
+                  Center(child: Text("Page 2", style: TextStyle(fontSize: 24))),
+                  Center(child: Text("Page 3", style: TextStyle(fontSize: 24))),
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 40),
-          // Expanded(
-          //   child: Stack(
-          //     children: [
-          //       ClipRRect(
-          //         borderRadius: const BorderRadius.only(
-          //           topLeft: Radius.circular(45),
-          //           topRight: Radius.circular(45),
-          //         ),
-          //         child: BackdropFilter(
-          //           filter: ImageFilter.blur(
-          //               sigmaX: 100.0, sigmaY: 100.0), // Adjust blur strength
-          //           child: Container(
-          //             decoration: BoxDecoration(
-          //               color: Colors.red.shade400.withOpacity(
-          //                   0.3), // Adjust opacity for the glass effect
-          //               borderRadius: const BorderRadius.only(
-          //                 topLeft: Radius.circular(45),
-          //                 topRight: Radius.circular(45),
-          //               ),
-          //             ),
-          //           ),
-          //         ),
-          //       ),
-          //       const Column(
-          //         children: [
-          //           SizedBox(height: 24),
-          //         ],
-          //       ),
-          //     ],
-          //   ),
-          // ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: _currentPage > 0 ? _prevPage : null,
+                    child: const Text("Back"),
+                  ),
+                  ElevatedButton(
+                    onPressed: _currentPage < 2 ? _nextPage : null,
+                    child: const Text("Next"),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

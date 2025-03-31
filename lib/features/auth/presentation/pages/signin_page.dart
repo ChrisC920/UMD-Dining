@@ -8,6 +8,7 @@ import 'package:flutter_moving_background/flutter_moving_background.dart';
 import 'package:gif/gif.dart';
 import 'package:umd_dining_refactor/core/common/widgets/loader.dart';
 import 'package:umd_dining_refactor/core/constants/constants.dart';
+import 'package:umd_dining_refactor/core/utils/show_snackbar.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/widgets/apple_sign_in_button.dart';
@@ -77,7 +78,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                     child: BlocConsumer<AuthBloc, AuthState>(
                       listener: (context, state) {
                         if (state is AuthFailure) {
-                          // showSnackBar(context, state.message);
+                          print(state.message);
                         } else if (state is AuthSuccess) {
                           // Future.delayed(const Duration(seconds: 6), () {
                           //   _updateCurrentPageIndex(1);
@@ -87,6 +88,11 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                             context,
                             StartPage.route(),
                             (route) => false,
+                          );
+                        } else if (state is AuthNewUser) {
+                          Navigator.push(
+                            context,
+                            OnboardingPage.route(),
                           );
                         }
                       },
@@ -390,9 +396,7 @@ class BackgroundCard extends StatelessWidget {
                   const SizedBox(height: 30),
                   ElevatedButton(
                       onPressed: () => onPageUpdate(1),
-                      child: Container(
-                        child: const Text("TEMP"),
-                      ))
+                      child: const Text("TEMP"))
                 ],
               ),
             ),

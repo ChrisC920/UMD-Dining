@@ -5,6 +5,7 @@ class UserModel extends User {
     required super.id,
     required super.email,
     required super.name,
+    required super.isNewUser,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> map) {
@@ -12,6 +13,7 @@ class UserModel extends User {
       id: map['id'] ?? '',
       email: map['email'] ?? '',
       name: map['name'] ?? '',
+      isNewUser: map['isNewUser'] ?? false,
     );
   }
 
@@ -19,11 +21,13 @@ class UserModel extends User {
     String? id,
     String? email,
     String? name,
+    bool? isNewUser,
   }) {
     return UserModel(
       id: id ?? this.id,
       email: email ?? this.email,
       name: name ?? this.name,
+      isNewUser: isNewUser ?? this.isNewUser,
     );
   }
 }

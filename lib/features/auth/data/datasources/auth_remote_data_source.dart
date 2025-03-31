@@ -109,7 +109,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw const ServerException('User is null!');
       }
 
-      return UserModel.fromJson(response.user!.toJson());
+      final userId = response.user!.id;
+      final userExists = await _checkIfUserExists(userId);
+
+      return UserModel.fromJson({
+        ...response.user!.toJson(),
+        'isNewUser': !userExists, // Add a flag to indicate new users
+      });
     } on AuthException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
@@ -170,5 +176,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       throw ServerException(e.toString());
     }
+  }
+
+  Future<bool> _checkIfUserExists(String userId) async {
+    final response = await supabaseClient
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .maybeSingle();
+
+    return response != null; // If null, user does not exist
   }
 }

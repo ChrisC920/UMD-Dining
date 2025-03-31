@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:umd_dining_refactor/config/themes/app_pallete.dart';
 import 'package:umd_dining_refactor/core/common/widgets/loader.dart';
 import 'package:umd_dining_refactor/core/constants/constants.dart';
