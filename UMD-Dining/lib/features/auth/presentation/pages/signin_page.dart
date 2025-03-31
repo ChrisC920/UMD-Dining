@@ -8,7 +8,6 @@ import 'package:flutter_moving_background/flutter_moving_background.dart';
 import 'package:gif/gif.dart';
 import 'package:umd_dining_refactor/core/common/widgets/loader.dart';
 import 'package:umd_dining_refactor/core/constants/constants.dart';
-import 'package:umd_dining_refactor/core/utils/show_snackbar.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/widgets/apple_sign_in_button.dart';
