@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/bloc/auth_bloc.dart'
-    as authBloc;
+    as auth_bloc;
 
 class AppleSignInButton extends StatelessWidget {
   const AppleSignInButton({
@@ -14,8 +14,8 @@ class AppleSignInButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: ElevatedButton(
         onPressed: () {
-          context.read<authBloc.AuthBloc>().add(
-                authBloc.AuthSignUpApple(),
+          context.read<auth_bloc.AuthBloc>().add(
+                auth_bloc.AuthSignUpApple(),
               );
         },
         style: ElevatedButton.styleFrom(

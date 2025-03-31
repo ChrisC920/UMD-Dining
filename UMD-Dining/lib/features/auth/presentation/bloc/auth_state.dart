@@ -18,3 +18,8 @@ final class AuthFailure extends AuthState {
   final String message;
   const AuthFailure(this.message);
 }
+
+final class AuthNewUser extends AuthState {
+  final User user;
+  const AuthNewUser(this.user);
+}
