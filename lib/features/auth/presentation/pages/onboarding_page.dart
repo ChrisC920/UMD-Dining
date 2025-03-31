@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_moving_background/enums/animation_types.dart';
 import 'package:flutter_moving_background/flutter_moving_background.dart';
 import 'package:gif/gif.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:umd_dining_refactor/core/constants/constants.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -16,11 +17,38 @@ class OnboardingPage extends StatefulWidget {
 
 class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
-  final int _totalPages = 3;
+  final int _totalPages = 4;
   int _currentPage = 0;
+  int selectedAge = 18;
+
+  // Dining hall preferences
+  bool likesYahentamitsi = false;
+  bool likes251 = false;
+  bool likesSouth = false;
+  // Dietary restrictions and preferences
+  bool allergicToSesame = false;
+  bool isVegan = false;
+  bool allergicToFish = false;
+  bool allergicToNuts = false;
+  bool allergicToShellfish = false;
+  bool dairyFree = false;
+  bool isHalal = false;
+  bool eggFree = false;
+  bool allergicToSoy = false;
+  bool glutenFree = false;
+  bool isVegetarian = false;
+  // Cuisine preferences
+  bool likesAmerican = false;
+  bool likesMexican = false;
+  bool likesItalian = false;
+  bool likesAsian = false;
+  bool likesIndian = false;
+  bool likesMediterranean = false;
+  bool likesAfrican = false;
+  bool likesMiddleEastern = false;
 
   void _nextPage() {
-    if (_currentPage < 2) {
+    if (_currentPage < _totalPages) {
       setState(() {
         _currentPage++;
         _pageController.animateToPage(
@@ -29,6 +57,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
           curve: Curves.easeInOut,
         );
       });
+    } else if (_currentPage >= _totalPages) {
+      // Handle page submission
     }
   }
 
@@ -88,30 +118,33 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
                   // Animated Progress Bar
                   Expanded(
-                    child: Stack(
-                      children: [
-                        // Background Bar
-                        Container(
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[500],
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        // Animated Progress Indicator
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          height: 4,
-                          width: MediaQuery.of(context).size.width *
-                              progress *
-                              0.8,
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ],
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        double width = constraints.maxWidth;
+                        return Stack(
+                          children: [
+                            // Background Bar
+                            Container(
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[500],
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                            // Animated Progress Indicator
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              height: 4,
+                              width: width * progress,
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
 
@@ -135,6 +168,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             ),
             Expanded(
               child: PageView(
+                physics: const NeverScrollableScrollPhysics(),
                 controller: _pageController,
                 onPageChanged: (index) {
                   setState(() {
@@ -143,8 +177,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 },
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
                           "Let's get to know you!",
@@ -158,56 +193,280 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           ),
                         ),
                         const SizedBox(height: 15),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
-                            "We just need to know a few things to get you started.",
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.grey[700],
-                              height: 1.2,
-                              letterSpacing: 1.2,
-                              fontFamily: 'Helvetica',
-                              fontWeight: FontWeight.normal,
-                            ),
+                        Text(
+                          "We just need to know a few things to get you started.",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.grey[700],
+                            height: 1.2,
+                            letterSpacing: 1.2,
+                            fontFamily: 'Helvetica',
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                         const SizedBox(height: 160),
-                        Stack(
-                          children: [
-                            Image.asset(
-                              'assets/images/Logo.png',
-                              width: 350,
-                            ),
-                            Positioned(
-                              bottom: 70,
-                              right: -10,
-                              child: Gif(
-                                height: 70,
-                                fps: 15,
-                                autostart: Autostart.loop,
-                                placeholder: (context) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                                image:
-                                    const AssetImage('assets/images/shine.gif'),
+                        Center(
+                          child: Stack(
+                            children: [
+                              Image.asset(
+                                'assets/images/Logo.png',
+                                width: 350,
                               ),
-                            ),
-                          ],
+                              Positioned(
+                                bottom: 70,
+                                right: -10,
+                                child: Gif(
+                                  height: 70,
+                                  fps: 15,
+                                  autostart: Autostart.loop,
+                                  placeholder: (context) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                  image: const AssetImage(
+                                      'assets/images/shine.gif'),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const Center(
-                      child: Text("Page 2", style: TextStyle(fontSize: 24))),
-                  const Center(
-                      child: Text("Page 3", style: TextStyle(fontSize: 24))),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "How old are you?",
+                          style: TextStyle(
+                            fontSize: 36,
+                            color: Colors.black,
+                            height: 1.2,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Helvetica',
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        Expanded(
+                          child: Center(
+                            child: NumberPicker(
+                              itemWidth: 130,
+                              value: selectedAge,
+                              minValue: 0,
+                              maxValue: 100,
+                              step: 1,
+                              itemHeight: 130,
+                              axis: Axis.horizontal,
+                              onChanged: (value) =>
+                                  setState(() => selectedAge = value),
+                              textStyle: TextStyle(
+                                fontSize: 80,
+                                color: Colors.grey[600],
+                                height: 1.2,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Helvetica',
+                              ),
+                              selectedTextStyle: const TextStyle(
+                                fontSize: 80,
+                                color: Colors.black,
+                                height: 1.2,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Helvetica',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Which dining halls are your favorite?",
+                          style: TextStyle(
+                            fontSize: 36,
+                            color: Colors.black,
+                            height: 1.2,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Helvetica',
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        Expanded(
+                          child: Center(
+                            child: Column(
+                              children: [
+                                _diningHallCheckBox("251 Dining Hall", likes251,
+                                    (bool? newValue) {
+                                  setState(() => likes251 = newValue!);
+                                }),
+                                _diningHallCheckBox("Yahentamitsi Dining Hall",
+                                    likesYahentamitsi, (bool? newValue) {
+                                  setState(() => likesYahentamitsi = newValue!);
+                                }),
+                                _diningHallCheckBox(
+                                    "South Dining Hall", likesSouth,
+                                    (bool? newValue) {
+                                  setState(() => likesSouth = newValue!);
+                                }),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Any dietary restrictions or preferences?",
+                          style: TextStyle(
+                            fontSize: 30,
+                            color: Colors.black,
+                            height: 1.2,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Helvetica',
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        Expanded(
+                          child: Center(
+                            child: Column(
+                              children: [
+                                _dietaryCheckBox("Vegetarian", isVegetarian,
+                                    (bool? newValue) {
+                                  setState(() => isVegetarian = newValue!);
+                                }),
+                                _dietaryCheckBox("Vegan", isVegan,
+                                    (bool? newValue) {
+                                  setState(() => isVegan = newValue!);
+                                }),
+                                _dietaryCheckBox("Dairy Free", dairyFree,
+                                    (bool? newValue) {
+                                  setState(() => dairyFree = newValue!);
+                                }),
+                                _dietaryCheckBox("Halal", isHalal,
+                                    (bool? newValue) {
+                                  setState(() => isHalal = newValue!);
+                                }),
+                                _dietaryCheckBox("Gluten Free", glutenFree,
+                                    (bool? newValue) {
+                                  setState(() => glutenFree = newValue!);
+                                }),
+                                _dietaryCheckBox(
+                                    "Sesame Allergy", allergicToSesame,
+                                    (bool? newValue) {
+                                  setState(() => allergicToSesame = newValue!);
+                                }),
+                                _dietaryCheckBox("Fish Allergy", allergicToFish,
+                                    (bool? newValue) {
+                                  setState(() => allergicToFish = newValue!);
+                                }),
+                                _dietaryCheckBox("Nut Allergy", allergicToNuts,
+                                    (bool? newValue) {
+                                  setState(() => allergicToNuts = newValue!);
+                                }),
+                                _dietaryCheckBox(
+                                    "Shellfish Allergy", allergicToShellfish,
+                                    (bool? newValue) {
+                                  setState(
+                                      () => allergicToShellfish = newValue!);
+                                }),
+                                _dietaryCheckBox("Egg Free", eggFree,
+                                    (bool? newValue) {
+                                  setState(() => eggFree = newValue!);
+                                }),
+                                _dietaryCheckBox("Soy Allergy", allergicToSoy,
+                                    (bool? newValue) {
+                                  setState(() => allergicToSoy = newValue!);
+                                }),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "What kind of cuisine do you like?",
+                          style: TextStyle(
+                            fontSize: 30,
+                            color: Colors.black,
+                            height: 1.2,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Helvetica',
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        Expanded(
+                          child: Center(
+                            child: Column(
+                              children: [
+                                _dietaryCheckBox("American", likesAmerican,
+                                    (bool? newValue) {
+                                  setState(() => likesAmerican = newValue!);
+                                }),
+                                _dietaryCheckBox("Mexican", likesMexican,
+                                    (bool? newValue) {
+                                  setState(() => likesMexican = newValue!);
+                                }),
+                                _dietaryCheckBox("Italian", likesItalian,
+                                    (bool? newValue) {
+                                  setState(() => likesItalian = newValue!);
+                                }),
+                                _dietaryCheckBox("Asian", likesAsian,
+                                    (bool? newValue) {
+                                  setState(() => likesAsian = newValue!);
+                                }),
+                                _dietaryCheckBox("Indian", likesIndian,
+                                    (bool? newValue) {
+                                  setState(() => likesIndian = newValue!);
+                                }),
+                                _dietaryCheckBox(
+                                    "Mediterranean", likesMediterranean,
+                                    (bool? newValue) {
+                                  setState(
+                                      () => likesMediterranean = newValue!);
+                                }),
+                                _dietaryCheckBox("African", likesAfrican,
+                                    (bool? newValue) {
+                                  setState(() => likesAfrican = newValue!);
+                                }),
+                                _dietaryCheckBox(
+                                    "Middle Eastern", likesMiddleEastern,
+                                    (bool? newValue) {
+                                  setState(
+                                      () => likesMiddleEastern = newValue!);
+                                }),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(40.0),
+                padding: const EdgeInsets.symmetric(horizontal: 40.0),
                 child: Column(
                   mainAxisAlignment:
                       MainAxisAlignment.center, // Center vertically
@@ -215,7 +474,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       CrossAxisAlignment.center, // Center horizontally
                   children: [
                     ElevatedButton(
-                      onPressed: _currentPage < _totalPages
+                      onPressed: _currentPage <= _totalPages
                           ? _nextPage
                           : null, // Disable when on last page
                       style: ButtonStyle(
@@ -225,7 +484,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               return Colors.black
                                   .withAlpha(150); // Custom disabled color
                             }
-                            return Colors.black; // Normal color
+                            return _currentPage < _totalPages
+                                ? Colors.black
+                                : const Color.fromARGB(255, 226, 64,
+                                    64); // Normal or disabled color
                           },
                         ),
                         foregroundColor: WidgetStateProperty.resolveWith<Color>(
@@ -247,13 +509,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           ),
                         ),
                       ),
-                      child: const Text(
-                        "Next",
-                        style: TextStyle(
-                          fontFamily: 'Helvetica',
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(
+                            milliseconds: 300), // Adjust for smoothness
+                        transitionBuilder:
+                            (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                              opacity: animation,
+                              child: child); // Fade transition
+                        },
+                        child: Text(
+                          _currentPage < _totalPages ? "Next" : "Continue",
+                          key: ValueKey<String>(_currentPage < _totalPages
+                              ? "Next"
+                              : "Continue"), // Unique key for text change
+                          style: const TextStyle(
+                            fontFamily: 'Helvetica',
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -299,6 +574,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -307,5 +583,53 @@ class _OnboardingPageState extends State<OnboardingPage> {
         ),
       ),
     );
+  }
+
+  CheckboxListTile _diningHallCheckBox(
+      String text, bool value, ValueChanged<bool?> onChanged) {
+    return CheckboxListTile(
+      activeColor: Colors.black,
+      checkColor: Colors.white,
+      side: const BorderSide(color: Colors.black, width: 2),
+      controlAffinity: ListTileControlAffinity.leading,
+      title: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 24,
+          color: Colors.black,
+          height: 1.2,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Helvetica',
+          letterSpacing: 0.1,
+        ),
+      ),
+      value: value,
+      onChanged: onChanged,
+    );
+  }
+
+  CheckboxListTile _dietaryCheckBox(
+      String text, bool value, ValueChanged<bool?> onChanged) {
+    return CheckboxListTile(
+        visualDensity:
+            const VisualDensity(horizontal: -4, vertical: -4), // Reduce size
+
+        activeColor: Colors.black,
+        checkColor: Colors.white,
+        side: const BorderSide(color: Colors.black, width: 2),
+        controlAffinity: ListTileControlAffinity.leading,
+        title: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.black,
+            height: 1.2,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Helvetica',
+            letterSpacing: 0.1,
+          ),
+        ),
+        value: value,
+        onChanged: onChanged);
   }
 }
