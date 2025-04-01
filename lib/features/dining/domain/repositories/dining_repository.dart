@@ -1,6 +1,7 @@
 import 'package:umd_dining_refactor/core/errors/failures.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/dining.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 
 abstract interface class DiningRepository {
   Future<Either<Failure, List<Dining>>> getAllFoods({required String database});
@@ -28,4 +29,5 @@ abstract interface class DiningRepository {
     String? protein,
     List<String>? allergens,
   });
+  Future<Either<Failure, Food>> getFoodById({required int foodId});
 }

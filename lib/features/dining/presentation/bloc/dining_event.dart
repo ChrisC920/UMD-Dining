@@ -66,3 +66,11 @@ final class DiningFetchFoodQuery extends DiningEvent {
     this.allergens,
   });
 }
+
+final class FoodFetchFoodDetails extends DiningEvent {
+  final int foodId;
+
+  FoodFetchFoodDetails({
+    required this.foodId,
+  });
+}

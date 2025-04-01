@@ -26,3 +26,8 @@ final class DiningGetFoodQuerySuccess extends DiningState {
   final List<Dining> foods;
   DiningGetFoodQuerySuccess(this.foods);
 }
+
+final class FoodGetFoodSuccess extends DiningState {
+  final Food food;
+  FoodGetFoodSuccess(this.food);
+}

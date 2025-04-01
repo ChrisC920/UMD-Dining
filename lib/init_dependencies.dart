@@ -22,6 +22,7 @@ import 'package:umd_dining_refactor/features/dining/data/repositories/dining_rep
 import 'package:umd_dining_refactor/features/dining/domain/repositories/dining_repository.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_all_food_items.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food.dart';
+import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food_details.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food_query.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
 
