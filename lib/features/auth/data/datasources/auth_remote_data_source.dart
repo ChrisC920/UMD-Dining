@@ -7,6 +7,7 @@ import 'package:umd_dining_refactor/core/secrets/secret.dart';
 import 'package:umd_dining_refactor/features/auth/data/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:crypto/crypto.dart';
+import 'package:umd_dining_refactor/features/auth/domain/usecases/update_user_preferences.dart';
 
 abstract interface class AuthRemoteDataSource {
   Session? get currentUserSession;
@@ -22,6 +23,8 @@ abstract interface class AuthRemoteDataSource {
   Future<UserModel> loginWithGoogleOAuth();
   Future<UserModel> loginWithAppleOAuth();
   Future<UserModel?> getCurrentUserData();
+
+  Future<UserModel> updateUserPreferences(UserPreferencesParams params);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -186,5 +189,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         .maybeSingle();
 
     return response != null; // If null, user does not exist
+  }
+
+  @override
+  Future<UserModel> updateUserPreferences(UserPreferencesParams params) async {
+    final userId = params.userId;
+    final preferences = params.preferences;
+
+    try {
+      final response = await supabaseClient.from('user_preferences').upsert({
+        'user_id': userId,
+        ...preferences, // Spreading the map to insert all fields
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+
+      return UserModel.fromJson(response); // Map the response to a User object
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
   }
 }

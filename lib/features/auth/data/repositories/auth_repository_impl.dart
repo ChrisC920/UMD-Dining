@@ -7,6 +7,7 @@ import 'package:umd_dining_refactor/core/common/entities/user.dart';
 import 'package:umd_dining_refactor/features/auth/data/models/user_model.dart';
 import 'package:umd_dining_refactor/features/auth/domain/repositories/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:umd_dining_refactor/features/auth/domain/usecases/update_user_preferences.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
@@ -93,6 +94,17 @@ class AuthRepositoryImpl implements AuthRepository {
     return _getUser(
       () async => await remoteDataSource.loginWithAppleOAuth(),
     );
+  }
+
+  @override
+  Future<Either<Failure, User>> updateUserPreferences(
+      UserPreferencesParams params) async {
+    try {
+      final updatedUser = await remoteDataSource.updateUserPreferences(params);
+      return Right(updatedUser);
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
   }
 
   Future<Either<Failure, User>> _getUser(

@@ -73,6 +73,11 @@ void _initAuth() {
         serviceLocator(),
       ),
     )
+    ..registerFactory(
+      () => UpdateUserPreferencesUseCase(
+        serviceLocator(),
+      ),
+    )
     // Bloc
     ..registerLazySingleton(
       () => AuthBloc(
@@ -80,6 +85,7 @@ void _initAuth() {
         userSignUpGoogle: serviceLocator(),
         userSignUpApple: serviceLocator(),
         userLogin: serviceLocator(),
+        updateUserPreferences: serviceLocator(),
         currentUser: serviceLocator(),
         appUserCubit: serviceLocator(),
       ),

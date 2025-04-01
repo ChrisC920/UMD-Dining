@@ -7,6 +7,7 @@ import 'package:umd_dining_refactor/features/auth/data/datasources/auth_remote_d
 import 'package:umd_dining_refactor/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:umd_dining_refactor/features/auth/domain/repositories/auth_repository.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/current_user.dart';
+import 'package:umd_dining_refactor/features/auth/domain/usecases/update_user_preferences.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_login.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_sign_up/user_sign_up_apple.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_sign_up/user_sign_up_email.dart';

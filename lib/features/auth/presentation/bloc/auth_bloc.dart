@@ -2,12 +2,14 @@ import 'package:umd_dining_refactor/core/common/cubits/app_user/app_user_cubit.d
 import 'package:umd_dining_refactor/core/usecases/usecase.dart';
 import 'package:umd_dining_refactor/core/common/entities/user.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/current_user.dart';
+import 'package:umd_dining_refactor/features/auth/domain/usecases/update_user_preferences.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_login.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_sign_up/user_sign_up_apple.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_sign_up/user_sign_up_email.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_sign_up/user_sign_up_google.dart';
+import 'package:equatable/equatable.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -19,6 +21,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final UserLogin _userLogin;
   final CurrentUser _currentUser;
   final AppUserCubit _appUserCubit;
+  final UpdateUserPreferencesUseCase _updateUserPreferencesUseCase;
+
   AuthBloc({
     required UserSignUpEmail userSignUpEmail,
     required UserSignUpGoogle userSignUpGoogle,
@@ -26,12 +30,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required UserLogin userLogin,
     required CurrentUser currentUser,
     required AppUserCubit appUserCubit,
+    required UpdateUserPreferencesUseCase updateUserPreferences,
   })  : _userSignUpEmail = userSignUpEmail,
         _userSignUpGoogle = userSignUpGoogle,
         _userSignUpApple = userSignUpApple,
         _userLogin = userLogin,
         _currentUser = currentUser,
         _appUserCubit = appUserCubit,
+        _updateUserPreferencesUseCase = updateUserPreferences,
         super(AuthInitial()) {
     on<AuthEvent>((_, emit) => emit(AuthLoading()));
     on<AuthSignUpEmail>(_onAuthSignUpEmail);
@@ -39,6 +45,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignUpApple>(_onAuthSignUpApple);
     on<AuthLogin>(_onAuthLogin);
     on<AuthIsUserLoggedIn>(_isUserLoggedIn);
+    on<UpdateUserPreferencesEvent>(_onUpdateUserPreferences);
   }
 
   void _isUserLoggedIn(
@@ -123,5 +130,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } else {
       emit(AuthSuccess(user));
     }
+  }
+
+  Future<void> _onUpdateUserPreferences(
+      UpdateUserPreferencesEvent event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+
+    final params = UserPreferencesParams(
+      userId: event.userId,
+      preferences: event.preferences,
+    );
+
+    final result = await _updateUserPreferencesUseCase(params);
+
+    result.fold(
+      (failure) => emit(AuthFailure(failure.message)),
+      (user) => emit(AuthSuccess(user)),
+    );
   }
 }
