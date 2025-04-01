@@ -54,9 +54,7 @@ class DiningModel extends Dining {
   factory DiningModel.fromJson(Map<String, dynamic> map) {
     return DiningModel(
       id: map['id'],
-      createdAt: map['created_at'] == null
-          ? DateTime.now()
-          : DateTime.parse(map['created_at']),
+      createdAt: map['created_at'] == null ? DateTime.now() : DateTime.parse(map['created_at']),
       name: map['name'] as String,
       diningHall: List<String>.from(map['dining_hall'] ?? []),
       section: List<String>.from(map['section'] ?? []),

@@ -18,15 +18,13 @@ class DiningRepositoryImpl implements DiningRepository {
   );
 
   @override
-  Future<Either<Failure, List<Dining>>> getAllFoods(
-      {required String database}) async {
+  Future<Either<Failure, List<Dining>>> getAllFoods({required String database}) async {
     try {
       if (!await (connectionChecker.isConnected)) {
         return left(Failure(Constants.noConnectionErrorMessage));
       }
 
-      final foods =
-          await diningRemoteDataSource.getAllFoods(database: database);
+      final foods = await diningRemoteDataSource.getAllFoods(database: database);
       return right(foods);
     } on ServerException catch (e) {
       return left(Failure(e.message));
@@ -78,9 +76,6 @@ class DiningRepositoryImpl implements DiningRepository {
       }
       final food = await diningRemoteDataSource.getFoodQuery(
         name: name,
-        diningHall: diningHall,
-        section: section,
-        mealType: mealType,
         link: link,
         servingSize: servingSize,
         servingsPerContainer: servingsPerContainer,
@@ -95,7 +90,6 @@ class DiningRepositoryImpl implements DiningRepository {
         totalSugar: totalSugar,
         addedSugar: addedSugar,
         protein: protein,
-        allergens: allergens,
       );
       return right(food);
     } on ServerException catch (e) {
