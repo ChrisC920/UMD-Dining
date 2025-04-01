@@ -7,7 +7,6 @@ import 'package:umd_dining_refactor/features/auth/domain/usecases/update_user_pr
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_login.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_sign_up/user_sign_up_apple.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_sign_up/user_sign_up_email.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_sign_up/user_sign_up_google.dart';
 import 'package:equatable/equatable.dart';
