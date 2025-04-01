@@ -42,6 +42,16 @@ final class UpdateUserPreferencesEvent extends AuthEvent {
   List<Object> get props => [userId, preferences];
 }
 
+final class UpdateUserProfileEvent extends AuthEvent {
+  final String userId;
+  final int age;
+
+  const UpdateUserProfileEvent({
+    required this.userId,
+    required this.age,
+  });
+}
+
 final class AuthSignUpGoogle extends AuthEvent {}
 
 final class AuthSignUpApple extends AuthEvent {}
