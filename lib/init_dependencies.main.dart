@@ -74,7 +74,12 @@ void _initAuth() {
       ),
     )
     ..registerFactory(
-      () => UpdateUserPreferencesUseCase(
+      () => UpdateUserPreferences(
+        serviceLocator(),
+      ),
+    )
+    ..registerFactory(
+      () => UpdateUserProfile(
         serviceLocator(),
       ),
     )
@@ -88,6 +93,7 @@ void _initAuth() {
         updateUserPreferences: serviceLocator(),
         currentUser: serviceLocator(),
         appUserCubit: serviceLocator(),
+        updateUserProfile: serviceLocator(),
       ),
     );
 }

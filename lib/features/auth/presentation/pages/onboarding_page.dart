@@ -66,7 +66,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
       });
     } else if (_currentPage >= _totalPages) {
       // Handle page submission
-      context.read<AuthBloc>().add(UpdateUserPreferencesEvent(userId: userId, preferences: preferences.preferences));
+      context.read<AuthBloc>().add(UpdateUserPreferencesEvent(
+            userId: userId,
+            preferences: preferences.preferences,
+          ));
+      context.read<AuthBloc>().add(UpdateUserProfileEvent(
+            userId: userId,
+            age: selectedAge,
+          ));
       Navigator.pushAndRemoveUntil(context, StartPage.route(), (route) => false);
     }
   }
@@ -108,11 +115,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
           if (state is AuthFailure) {
           } else if (state is AuthSuccess) {
             userId = state.user.id;
-            Navigator.pushAndRemoveUntil(
-              context,
-              StartPage.route(),
-              (route) => false,
-            );
+            // Navigator.pushAndRemoveUntil(
+            //   context,
+            //   StartPage.route(),
+            //   (route) => false,
+            // );
           }
         }, builder: (context, state) {
           if (state is AuthLoading) {

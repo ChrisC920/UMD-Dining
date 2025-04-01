@@ -8,6 +8,7 @@ import 'package:umd_dining_refactor/features/auth/data/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:crypto/crypto.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/update_user_preferences.dart';
+import 'package:umd_dining_refactor/features/auth/domain/usecases/update_user_profile.dart';
 
 abstract interface class AuthRemoteDataSource {
   Session? get currentUserSession;
@@ -23,7 +24,7 @@ abstract interface class AuthRemoteDataSource {
   Future<UserModel> loginWithGoogleOAuth();
   Future<UserModel> loginWithAppleOAuth();
   Future<UserModel?> getCurrentUserData();
-
+  Future<UserModel> updateUserProfile(UserProfileParams params);
   Future<UserModel> updateUserPreferences(UserPreferencesParams params);
 }
 
@@ -141,8 +142,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
       final idToken = credential.identityToken;
       if (idToken == null) {
-        throw const ServerException(
-            'Could not find ID Token from generated credential.');
+        throw const ServerException('Could not find ID Token from generated credential.');
       }
       final response = await supabaseClient.auth.signInWithIdToken(
         provider: OAuthProvider.apple,
@@ -181,12 +181,30 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
+  // NOTE: ONLY AGE WORKS RIGHT NOW
+  @override
+  Future<UserModel> updateUserProfile(UserProfileParams params) async {
+    final userId = params.userId;
+
+    try {
+      final response = await supabaseClient
+          .from('profiles')
+          .update({
+            'age': params.age,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', userId)
+          .select()
+          .single();
+
+      return UserModel.fromJson(response); // Map the response to a User object
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
   Future<bool> _checkIfUserExists(String userId) async {
-    final response = await supabaseClient
-        .from('profiles')
-        .select('id')
-        .eq('id', userId)
-        .maybeSingle();
+    final response = await supabaseClient.from('profiles').select('id').eq('id', userId).maybeSingle();
 
     return response != null; // If null, user does not exist
   }

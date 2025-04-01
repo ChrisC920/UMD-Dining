@@ -3,6 +3,7 @@ import 'package:umd_dining_refactor/core/usecases/usecase.dart';
 import 'package:umd_dining_refactor/core/common/entities/user.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/current_user.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/update_user_preferences.dart';
+import 'package:umd_dining_refactor/features/auth/domain/usecases/update_user_profile.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_login.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_sign_up/user_sign_up_apple.dart';
 import 'package:umd_dining_refactor/features/auth/domain/usecases/user_sign_up/user_sign_up_email.dart';
@@ -21,7 +22,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final UserLogin _userLogin;
   final CurrentUser _currentUser;
   final AppUserCubit _appUserCubit;
-  final UpdateUserPreferencesUseCase _updateUserPreferencesUseCase;
+  final UpdateUserPreferences _updateUserPreferencesUseCase;
+  final UpdateUserProfile _updateUserProfile;
 
   AuthBloc({
     required UserSignUpEmail userSignUpEmail,
@@ -30,7 +32,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required UserLogin userLogin,
     required CurrentUser currentUser,
     required AppUserCubit appUserCubit,
-    required UpdateUserPreferencesUseCase updateUserPreferences,
+    required UpdateUserPreferences updateUserPreferences,
+    required UpdateUserProfile updateUserProfile,
   })  : _userSignUpEmail = userSignUpEmail,
         _userSignUpGoogle = userSignUpGoogle,
         _userSignUpApple = userSignUpApple,
@@ -38,6 +41,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _currentUser = currentUser,
         _appUserCubit = appUserCubit,
         _updateUserPreferencesUseCase = updateUserPreferences,
+        _updateUserProfile = updateUserProfile,
         super(AuthInitial()) {
     on<AuthEvent>((_, emit) => emit(AuthLoading()));
     on<AuthSignUpEmail>(_onAuthSignUpEmail);
@@ -46,6 +50,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogin>(_onAuthLogin);
     on<AuthIsUserLoggedIn>(_isUserLoggedIn);
     on<UpdateUserPreferencesEvent>(_onUpdateUserPreferences);
+    on<UpdateUserProfileEvent>(_onUpdateUserProfile);
   }
 
   void _isUserLoggedIn(
@@ -132,8 +137,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onUpdateUserPreferences(
-      UpdateUserPreferencesEvent event, Emitter<AuthState> emit) async {
+  Future<void> _onUpdateUserPreferences(UpdateUserPreferencesEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
 
     final params = UserPreferencesParams(
@@ -146,6 +150,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),
       (user) => emit(AuthSuccess(user)),
+    );
+  }
+
+  void _onUpdateUserProfile(
+    UpdateUserProfileEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+
+    final res = await _updateUserProfile(
+      UserProfileParams(
+        userId: event.userId,
+        age: event.age,
+      ),
+    );
+
+    res.fold(
+      (failure) => emit(AuthFailure(failure.message)),
+      (user) => _emitAuthSuccess(user, emit), // Update user state
     );
   }
 }
