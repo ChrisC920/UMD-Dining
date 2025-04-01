@@ -54,10 +54,8 @@ class _DiningPageState extends State<DiningPage> {
 
   void search(String query, List<String> mealTypes) {
     setState(() {
-      items = allItems
-          .where((e) => e.name.toLowerCase().contains(query.toLowerCase()))
-          .where((e) => mealTypes.every((type) => e.mealType.contains(type)))
-          .toList();
+      items =
+          allItems.where((e) => e.name.toLowerCase().contains(query.toLowerCase())).where((e) => mealTypes.every((type) => e.mealType.contains(type))).toList();
     });
   }
 
@@ -82,10 +80,8 @@ class _DiningPageState extends State<DiningPage> {
         selectedIndex: currentPageIndex,
         destinations: [
           NavigationDestination(
-            icon: const Icon(Icons.home,
-                size: 28, color: Colors.grey), // Unselected
-            selectedIcon: Icon(Icons.home,
-                size: 32, color: Colors.red[200]), // Selected icon color
+            icon: const Icon(Icons.home, size: 28, color: Colors.grey), // Unselected
+            selectedIcon: Icon(Icons.home, size: 32, color: Colors.red[200]), // Selected icon color
             label: 'Home',
           ),
           NavigationDestination(
@@ -95,7 +91,7 @@ class _DiningPageState extends State<DiningPage> {
           ),
           NavigationDestination(
             icon: const Icon(Icons.favorite, size: 28, color: Colors.grey),
-            selectedIcon: Icon(Icons.abc, size: 32, color: Colors.red[200]),
+            selectedIcon: Icon(Icons.favorite, size: 32, color: Colors.red[200]),
             label: 'Favorites',
           ),
         ],

@@ -11,10 +11,11 @@ import 'package:umd_dining_refactor/features/auth/presentation/bloc/auth_bloc.da
 import 'package:umd_dining_refactor/features/dining/presentation/pages/start_page.dart';
 
 class OnboardingPage extends StatefulWidget {
-  static route() => MaterialPageRoute(
-        builder: (context) => const OnboardingPage(),
+  static route(String id) => MaterialPageRoute(
+        builder: (context) => OnboardingPage(userId: id),
       );
-  const OnboardingPage({super.key});
+  const OnboardingPage({super.key, required this.userId});
+  final String userId;
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
@@ -26,7 +27,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   UserPreferences preferences = UserPreferences();
   int _currentPage = 0;
   int selectedAge = 18;
-  late String userId;
+  String get userId => widget.userId;
 
   // Dining hall preferences
   bool likesYahentamitsi = false;
@@ -114,12 +115,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
         child: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
           if (state is AuthFailure) {
           } else if (state is AuthSuccess) {
-            userId = state.user.id;
-            Navigator.pushAndRemoveUntil(
-              context,
-              StartPage.route(),
-              (route) => false,
-            );
+            // Navigator.pushAndRemoveUntil(
+            //   context,
+            //   StartPage.route(),
+            //   (route) => false,
+            // );
           }
         }, builder: (context, state) {
           if (state is AuthLoading) {

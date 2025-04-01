@@ -63,8 +63,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            BackgroundCard(
-                currentPageIndex: 0, onPageUpdate: _updateCurrentPageIndex),
+            BackgroundCard(currentPageIndex: 0, onPageUpdate: _updateCurrentPageIndex),
             IgnorePointer(
               child: PageView(
                 physics: const NeverScrollableScrollPhysics(),
@@ -91,7 +90,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                         } else if (state is AuthNewUser) {
                           Navigator.push(
                             context,
-                            OnboardingPage.route(),
+                            OnboardingPage.route(state.user.id),
                           );
                         }
                       },
@@ -127,12 +126,10 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                                           height: 70,
                                           fps: 15,
                                           autostart: Autostart.loop,
-                                          placeholder: (context) =>
-                                              const Center(
+                                          placeholder: (context) => const Center(
                                             child: CircularProgressIndicator(),
                                           ),
-                                          image: const AssetImage(
-                                              'assets/images/shine.gif'),
+                                          image: const AssetImage('assets/images/shine.gif'),
                                         ),
                                       ),
                                     ],
@@ -142,8 +139,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                             ),
                             const SizedBox(height: 50),
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 15.0),
                               child: RichText(
                                 textAlign: TextAlign.center,
                                 text: const TextSpan(
@@ -166,8 +162,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                                     TextSpan(text: ' at '),
                                     TextSpan(
                                         style: TextStyle(
-                                          color:
-                                              Color.fromARGB(255, 213, 80, 80),
+                                          color: Color.fromARGB(255, 213, 80, 80),
                                         ),
                                         text: 'Maryland'),
                                     TextSpan(text: ' Dining Halls'),
@@ -194,7 +189,6 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                       },
                     ),
                   ),
-                  const OnboardingPage(),
                 ],
               ),
             ),
@@ -223,16 +217,13 @@ class TermsAndConditionsText extends StatelessWidget {
             height: 1.5,
           ),
           children: [
-            const TextSpan(
-                text: 'By signing up, you have read and agree to our\n'),
+            const TextSpan(text: 'By signing up, you have read and agree to our\n'),
             TextSpan(
               text: 'Terms of Use',
-              style: const TextStyle(
-                  color: Colors.blue, decoration: TextDecoration.underline),
+              style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
               recognizer: TapGestureRecognizer()
                 ..onTap = () async {
-                  final url =
-                      Uri.parse('https://www.youtube.com/watch?v=ZfAYK1AEI2g');
+                  final url = Uri.parse('https://www.youtube.com/watch?v=ZfAYK1AEI2g');
                   if (await canLaunchUrl(url)) {
                     await launchUrl(url);
                   } else {
@@ -243,12 +234,10 @@ class TermsAndConditionsText extends StatelessWidget {
             const TextSpan(text: ' and '),
             TextSpan(
               text: 'Privacy Policy',
-              style: const TextStyle(
-                  color: Colors.blue, decoration: TextDecoration.underline),
+              style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
               recognizer: TapGestureRecognizer()
                 ..onTap = () async {
-                  final url =
-                      Uri.parse('https://www.youtube.com/watch?v=ZfAYK1AEI2g');
+                  final url = Uri.parse('https://www.youtube.com/watch?v=ZfAYK1AEI2g');
                   if (await canLaunchUrl(url)) {
                     await launchUrl(url);
                   } else {
@@ -288,13 +277,11 @@ class BackgroundCard extends StatelessWidget {
               topRight: Radius.circular(45),
             ),
             child: BackdropFilter(
-              filter: ImageFilter.blur(
-                  sigmaX: 100.0, sigmaY: 100.0), // Adjust blur strength
+              filter: ImageFilter.blur(sigmaX: 100.0, sigmaY: 100.0), // Adjust blur strength
               child: Container(
                 // height: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.red.shade400
-                      .withOpacity(0.3), // Adjust opacity for the glass effect
+                  color: Colors.red.shade400.withOpacity(0.3), // Adjust opacity for the glass effect
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(45),
                     topRight: Radius.circular(45),
@@ -346,8 +333,7 @@ class BackgroundCard extends StatelessWidget {
                   const Expanded(
                     child: Column(
                       children: [
-                        Icon(Icons.arrow_drop_down,
-                            size: 100, color: Color.fromARGB(255, 56, 56, 56)),
+                        Icon(Icons.arrow_drop_down, size: 100, color: Color.fromARGB(255, 56, 56, 56)),
                         Center(
                           child: HorizontalScroll(),
                         ),
@@ -361,8 +347,7 @@ class BackgroundCard extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size.fromHeight(75),
                         backgroundColor: const Color.fromARGB(142, 0, 24, 57),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                       ),
                       onPressed: () => onPageUpdate(2),
                       child: const Row(
@@ -391,12 +376,7 @@ class BackgroundCard extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOutQuart,
               child: Column(
-                children: [
-                  const SizedBox(height: 30),
-                  ElevatedButton(
-                      onPressed: () => onPageUpdate(1),
-                      child: const Text("TEMP"))
-                ],
+                children: [const SizedBox(height: 30), ElevatedButton(onPressed: () => onPageUpdate(1), child: const Text("TEMP"))],
               ),
             ),
         ],
