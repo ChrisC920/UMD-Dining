@@ -1,6 +1,7 @@
 import 'package:umd_dining_refactor/core/errors/exceptions.dart';
 import 'package:umd_dining_refactor/features/dining/data/models/dining_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 
 abstract interface class DiningRemoteDataSource {
   Future<List<DiningModel>> getAllFoods({
@@ -27,11 +28,28 @@ abstract interface class DiningRemoteDataSource {
     String? addedSugar,
     String? protein,
   });
+  Future<Food> getFoodById({required int id});
 }
 
 class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
   final SupabaseClient supabaseClient;
   DiningRemoteDataSourceImpl(this.supabaseClient);
+
+  @override
+  Future<Food> getFoodById({required int id}) async {
+    final response = await supabaseClient.from('foods').select('''
+            id, name, link, serving_size, servings_per_container,
+            calories_per_serving, total_fat, saturated_fat, trans_fat,
+            total_carbohydrates, dietary_fiber, total_sugars, added_sugars,
+            cholesterol, sodium, protein,
+            food_allergens(allergens(id, name)),
+            food_meal_types(meal_types(id, name)),
+            food_dining_halls(dining_halls(id, name)),
+            food_sections(sections(id, name))
+          ''').eq('id', id).single();
+
+    return Food.fromJson(response);
+  }
 
   @override
   Future<List<DiningModel>> getAllFoods({required String database}) async {

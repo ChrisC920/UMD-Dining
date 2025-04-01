@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:umd_dining_refactor/config/themes/app_theme.dart';
 import 'package:umd_dining_refactor/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:umd_dining_refactor/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/pages/signin_page.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/pages/start_page.dart';

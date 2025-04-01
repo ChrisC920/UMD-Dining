@@ -5,6 +5,7 @@ import 'package:umd_dining_refactor/core/network/connection_checker.dart';
 import 'package:umd_dining_refactor/features/dining/data/datasources/dining_remote_data_source.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/dining.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/repositories/dining_repository.dart';
 
 class DiningRepositoryImpl implements DiningRepository {
@@ -91,6 +92,19 @@ class DiningRepositoryImpl implements DiningRepository {
         addedSugar: addedSugar,
         protein: protein,
       );
+      return right(food);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Food>> getFoodById({required int foodId}) async {
+    try {
+      if (!await (connectionChecker.isConnected)) {
+        return left(Failure(Constants.noConnectionErrorMessage));
+      }
+      final food = await diningRemoteDataSource.getFoodById(id: foodId);
       return right(food);
     } on ServerException catch (e) {
       return left(Failure(e.message));
