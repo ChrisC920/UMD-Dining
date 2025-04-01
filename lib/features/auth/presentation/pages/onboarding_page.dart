@@ -115,11 +115,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
           if (state is AuthFailure) {
           } else if (state is AuthSuccess) {
             userId = state.user.id;
-            // Navigator.pushAndRemoveUntil(
-            //   context,
-            //   StartPage.route(),
-            //   (route) => false,
-            // );
+            Navigator.pushAndRemoveUntil(
+              context,
+              StartPage.route(),
+              (route) => false,
+            );
           }
         }, builder: (context, state) {
           if (state is AuthLoading) {
