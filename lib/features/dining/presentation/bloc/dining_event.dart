@@ -19,6 +19,22 @@ final class DiningFetchFood extends DiningEvent {
   });
 }
 
+final class FoodFetchFoodsByFilters extends DiningEvent {
+  final List<String>? mealTypes;
+  final List<String>? diningHalls;
+  final List<String>? sections;
+  final List<String>? dates;
+  final List<String>? allergens;
+
+  FoodFetchFoodsByFilters({
+    this.mealTypes,
+    this.diningHalls,
+    this.sections,
+    this.dates,
+    this.allergens,
+  });
+}
+
 final class DiningFetchFoodQuery extends DiningEvent {
   final int? id;
   final DateTime? createdAt;

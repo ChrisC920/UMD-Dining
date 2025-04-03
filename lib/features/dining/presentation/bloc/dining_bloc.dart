@@ -6,6 +6,7 @@ import 'package:umd_dining_refactor/features/dining/domain/usecases/get_all_food
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food_details.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food_query.dart';
+import 'package:umd_dining_refactor/features/dining/domain/usecases/get_foods_by_query.dart';
 part 'dining_event.dart';
 part 'dining_state.dart';
 
@@ -14,22 +15,51 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
   final GetFood _getFood;
   final GetFoodQuery _getFoodQuery;
   final GetFoodDetails _getFoodDetails;
+  final GetFoodsByFilters _getFoodsByFilters;
 
   DiningBloc({
     required GetAllFoods getAllFoods,
     required GetFood getFood,
     required GetFoodQuery getFoodQuery,
     required GetFoodDetails getFoodDetails,
+    required GetFoodsByFilters getFoodsByFilters,
   })  : _getAllFoods = getAllFoods,
         _getFood = getFood,
         _getFoodQuery = getFoodQuery,
         _getFoodDetails = getFoodDetails,
+        _getFoodsByFilters = getFoodsByFilters,
         super(DiningInitial()) {
     on<DiningEvent>((event, emit) => emit(DiningLoading()));
     on<DiningFetchAllFoods>(_onFetchAllFoods);
     on<DiningFetchFood>(_onFetchFood);
     on<DiningFetchFoodQuery>(_onFetchFoodQuery);
     on<FoodFetchFoodDetails>(_onFetchFoodDetails);
+    on<FoodFetchFoodsByFilters>(_onFetchFoodsByFilters);
+  }
+
+  void _onFetchFoodsByFilters(
+    FoodFetchFoodsByFilters event,
+    Emitter<DiningState> emit,
+  ) async {
+    // Emit loading state
+    emit(DiningLoading());
+
+    final res = await _getFoodsByFilters(GetFoodsByFiltersParams(
+      dates: event.dates,
+      diningHalls: event.diningHalls,
+      mealTypes: event.mealTypes,
+      sections: event.sections,
+      allergens: event.allergens,
+    ));
+
+    res.fold(
+      (l) {
+        emit(DiningFailure(l.message));
+      },
+      (r) {
+        emit(FoodGetFoodsByFiltersSuccess(r));
+      },
+    );
   }
 
   void _onFetchFoodDetails(

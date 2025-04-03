@@ -139,6 +139,11 @@ void _initDining() {
         serviceLocator(),
       ),
     )
+    ..registerFactory(
+      () => GetFoodsByFilters(
+        serviceLocator(),
+      ),
+    )
 
     // Bloc
     ..registerLazySingleton(
@@ -147,6 +152,7 @@ void _initDining() {
         getFood: serviceLocator(),
         getFoodQuery: serviceLocator(),
         getFoodDetails: serviceLocator(),
+        getFoodsByFilters: serviceLocator(),
       ),
     );
 }

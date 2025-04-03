@@ -30,4 +30,11 @@ abstract interface class DiningRepository {
     List<String>? allergens,
   });
   Future<Either<Failure, Food>> getFoodById({required int foodId});
+  Future<Either<Failure, List<Food>>> getFoodsByFilters({
+    List<String>? mealTypes,
+    List<String>? diningHalls,
+    List<String>? sections,
+    List<String>? dates,
+    List<String>? allergens,
+  });
 }

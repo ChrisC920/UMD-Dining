@@ -24,6 +24,7 @@ import 'package:umd_dining_refactor/features/dining/domain/usecases/get_all_food
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food_details.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food_query.dart';
+import 'package:umd_dining_refactor/features/dining/domain/usecases/get_foods_by_query.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
 
 import 'package:get_it/get_it.dart';
