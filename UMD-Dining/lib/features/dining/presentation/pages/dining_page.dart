@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:umd_dining_refactor/config/themes/app_pallete.dart';
-import 'package:umd_dining_refactor/core/common/widgets/loader.dart';
 import 'package:umd_dining_refactor/core/constants/constants.dart';
 import 'package:umd_dining_refactor/core/utils/show_snackbar.dart';
-import 'package:umd_dining_refactor/features/dining/domain/entities/dining.dart';
+import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/pages/food_page.dart';
 
@@ -26,36 +25,59 @@ class DiningPage extends StatefulWidget {
 class _DiningPageState extends State<DiningPage> {
   List<String>? get diningHall => widget.diningHall;
   final TextEditingController _searchController = TextEditingController();
-  List<Dining> allItems = [];
-  List<Dining> items = [];
-  List<Dining> searchHistory = [];
+  List<Food> allItems = [];
+  List<Food> items = [];
+  List<Food> searchHistory = [];
   List<String> selectedMealTypes = [];
   int currentPageIndex = 1;
 
   @override
   void initState() {
     super.initState();
-    context.read<DiningBloc>().add(DiningFetchFoodQuery(
-          diningHall: diningHall,
-          mealType: selectedMealTypes,
+    context.read<DiningBloc>().add(FoodFetchFoodsByFilters(
+          diningHalls: diningHall,
         ));
     setState(() {
       currentPageIndex = 1;
     });
-    _searchController.addListener(queryListener);
+    _searchController.addListener(_filterItems);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _searchController.removeListener(queryListener);
+    _searchController.removeListener(_filterItems);
     _searchController.dispose();
   }
 
   void search(String query, List<String> mealTypes) {
+    // setState(() {
+    //   if (query.isEmpty) {
+    //     items = allItems;
+    //   }
+    //   items = allItems
+    //       .where((e) => e.name.toLowerCase().contains(query.toLowerCase()))
+    //       .where((e) => mealTypes.every((type) => e.mealTypes.contains(type)))
+    //       .toList();
+    // });
+    final query = _searchController.text.toLowerCase();
     setState(() {
-      items =
-          allItems.where((e) => e.name.toLowerCase().contains(query.toLowerCase())).where((e) => mealTypes.every((type) => e.mealType.contains(type))).toList();
+      if (query.isEmpty) {
+        items = allItems; // Show all items when search is empty
+      } else {
+        items = items.where((food) => food.name.toLowerCase().contains(query)).toList();
+      }
+    });
+  }
+
+  void _filterItems() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        items = List.from(allItems); // Show all items when search is empty
+      } else {
+        items = allItems.where((food) => food.name.toLowerCase().contains(query)).toList();
+      }
     });
   }
 
@@ -127,56 +149,60 @@ class _DiningPageState extends State<DiningPage> {
               color: Colors.green,
             ),
           ),
-          BlocConsumer<DiningBloc, DiningState>(
-            listener: (context, state) {
-              if (state is DiningFailure) {
-                showSnackBar(context, state.error);
-              }
-            },
-            builder: (context, state) {
-              if (state is DiningLoading) {
-                return const Loader();
-              }
-              if (state is DiningGetFoodQuerySuccess) {
-                allItems = state.foods;
-                return Column(
-                  children: [
-                    _mealTypeOptions(),
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: SearchBar(
-                        controller: _searchController,
-                        hintText: 'Search',
-                        leading: IconButton(
-                          icon: const Icon(Icons.search),
-                          onPressed: () {},
-                        ),
-                      ),
+          Column(
+            children: [
+              _mealTypeOptions(),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: SearchBar(
+                  controller: _searchController,
+                  hintText: 'Search',
+                  leading: IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {},
+                  ),
+                ),
+              ),
+              BlocConsumer<DiningBloc, DiningState>(
+                listener: (context, state) {
+                  if (state is DiningFailure) {
+                    showSnackBar(context, state.error);
+                  }
+                  if (state is FoodGetFoodsByFiltersSuccess) {
+                    setState(() {
+                      items = state.foods; // Update list when data is fetched
+                      allItems = List.from(state.foods);
+                    });
+                  }
+                },
+                builder: (context, state) {
+                  if (state is DiningLoading && items.isEmpty) {
+                    return const Center(child: CircularProgressIndicator()); // Show loading only when empty
+                  }
+
+                  if (items.isEmpty) {
+                    return const Center(child: Text("No foods found."));
+                  }
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: items.length > 100 ? 100 : items.length,
+                      itemBuilder: (context, index) {
+                        final food = items[index];
+                        return ListTile(
+                          title: Text(food.name),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              FoodPage.route(food),
+                            );
+                          },
+                        );
+                      },
                     ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: items.length > 100 ? 100 : items.length,
-                        itemBuilder: (context, index) {
-                          final food = items[index];
-                          return ListTile(
-                            title: Text(food.name),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                FoodPage.route(food),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                );
-              }
-              return const SizedBox(
-                child: Text("ERROR"),
-              );
-            },
+                  );
+                },
+              ),
+            ],
           ),
           Container(
             width: 100,
@@ -185,24 +211,6 @@ class _DiningPageState extends State<DiningPage> {
           ),
         ][currentPageIndex],
       ),
-    );
-  }
-
-  NavigationDestination _buildNavItem({
-    required IconData icon,
-    required IconData selectedIcon,
-  }) {
-    return NavigationDestination(
-      icon: Icon(icon),
-      selectedIcon: Container(
-        padding: const EdgeInsets.all(8.0),
-        decoration: const BoxDecoration(
-          color: Colors.blue, // Circular background color when selected
-          shape: BoxShape.circle,
-        ),
-        child: Icon(selectedIcon, color: Colors.white),
-      ),
-      label: '', // Hide label
     );
   }
 

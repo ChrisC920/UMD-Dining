@@ -19,6 +19,31 @@ class DiningRepositoryImpl implements DiningRepository {
   );
 
   @override
+  Future<Either<Failure, List<Food>>> getFoodsByFilters({
+    List<String>? mealTypes,
+    List<String>? diningHalls,
+    List<String>? sections,
+    List<String>? dates,
+    List<String>? allergens,
+  }) async {
+    try {
+      if (!await (connectionChecker.isConnected)) {
+        return left(Failure(Constants.noConnectionErrorMessage));
+      }
+      final food = await diningRemoteDataSource.getFoodsByFilters(
+        mealTypes: mealTypes,
+        diningHalls: diningHalls,
+        sections: sections,
+        dates: dates,
+        allergens: allergens,
+      );
+      return right(food);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<Dining>>> getAllFoods({required String database}) async {
     try {
       if (!await (connectionChecker.isConnected)) {

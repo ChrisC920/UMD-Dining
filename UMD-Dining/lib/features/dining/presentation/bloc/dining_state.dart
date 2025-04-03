@@ -31,3 +31,8 @@ final class FoodGetFoodSuccess extends DiningState {
   final Food food;
   FoodGetFoodSuccess(this.food);
 }
+
+final class FoodGetFoodsByFiltersSuccess extends DiningState {
+  final List<Food> foods;
+  FoodGetFoodsByFiltersSuccess(this.foods);
+}

@@ -92,17 +92,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
   }
 
-  void _updateCurrentPageIndex(int index) {
-    setState(() {
-      _currentPage = index;
-      _pageController.animateToPage(
-        _currentPage,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     double progress = (_currentPage) / _totalPages;

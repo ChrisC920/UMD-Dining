@@ -29,11 +29,89 @@ abstract interface class DiningRemoteDataSource {
     String? protein,
   });
   Future<Food> getFoodById({required int id});
+  Future<List<Food>> getFoodsByFilters({
+    List<String>? dates, // List of dates (YYYY-MM-DD) to query by
+    List<String>? diningHalls, // List of dining hall names
+    List<String>? mealTypes, // List of meal type names
+    List<String>? sections,
+    List<String>? allergens,
+  });
 }
 
 class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
   final SupabaseClient supabaseClient;
   DiningRemoteDataSourceImpl(this.supabaseClient);
+
+  @override
+  Future<List<Food>> getFoodsByFilters({
+    List<String>? dates, // List of dates (YYYY-MM-DD) to query by
+    List<String>? diningHalls, // List of dining hall names
+    List<String>? mealTypes, // List of meal type names
+    List<String>? sections, // List of section names
+    List<String>? allergens,
+  }) async {
+    try {
+      var query = supabaseClient.from('food_dates').select('''
+  food_id, date_served,
+  foods!inner (
+    id, name, link, serving_size, servings_per_container, calories_per_serving, total_fat, saturated_fat, trans_fat,
+    total_carbohydrates, dietary_fiber, total_sugars, added_sugars, cholesterol, sodium, protein,
+    food_allergens!left (allergens (id, name)),
+    food_dining_halls!left (dining_halls (id, name)),
+    food_meal_types!left (meal_types (id, name)),
+    food_sections!left (sections (id, name))
+  )
+''');
+
+      // .order('date_served', ascending: false);
+
+      // Filter by multiple dates
+      if (dates != null && dates.isNotEmpty) {
+        query = query.inFilter('date_served', dates);
+      }
+
+      // Filter by dining hall names
+      if (diningHalls != null && diningHalls.isNotEmpty) {
+        query = query.inFilter('foods.food_dining_halls.dining_halls.name', diningHalls);
+      }
+
+      // Filter by meal type names
+      if (mealTypes != null && mealTypes.isNotEmpty) {
+        query = query.inFilter('meal_types.name', mealTypes);
+      }
+
+      // Filter by section names
+      if (sections != null && sections.isNotEmpty) {
+        query = query.inFilter('sections.name', sections);
+      }
+
+      if (allergens != null && allergens.isNotEmpty) {
+        query = query.inFilter('allergens.name', allergens);
+      }
+
+      final response = await query;
+      final test = response
+          .map((food) {
+            try {
+              return Food.fromJson(food);
+            } catch (e, stacktrace) {
+              print("Error parsing food item: $food");
+              print("Error details: $e");
+              print("Stacktrace: $stacktrace");
+              return null; // Skip bad entries
+            }
+          })
+          .whereType<Food>()
+          .toList();
+
+      // Convert response data into List<Food>
+      return test;
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
 
   @override
   Future<Food> getFoodById({required int id}) async {
