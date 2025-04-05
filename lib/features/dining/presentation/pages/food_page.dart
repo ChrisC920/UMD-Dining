@@ -92,6 +92,7 @@ class _FoodPageState extends State<FoodPage> {
             child: NutritionText(text: 'Added Sugars: ${food.addedSugars}'),
           ),
           NutritionText(text: 'Allergens: ${food.allergens.toString()}'),
+          NutritionText(text: 'Dates Served: ${food.dates.toString()}'),
         ],
       ),
     );

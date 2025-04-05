@@ -185,7 +185,7 @@ class _DiningPageState extends State<DiningPage> {
                   }
                   return Expanded(
                     child: ListView.builder(
-                      itemCount: items.length > 100 ? 100 : items.length,
+                      itemCount: items.length > 200 ? 200 : items.length,
                       itemBuilder: (context, index) {
                         final food = items[index];
                         return ListTile(

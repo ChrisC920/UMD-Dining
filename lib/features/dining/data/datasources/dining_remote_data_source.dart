@@ -51,46 +51,46 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
     List<String>? allergens,
   }) async {
     try {
-      var query = supabaseClient.from('food_dates').select('''
-  food_id, date_served,
+      var query = supabaseClient.from('food_relations').select('''
+  food_id,
   foods!inner (
     id, name, link, serving_size, servings_per_container, calories_per_serving, total_fat, saturated_fat, trans_fat,
     total_carbohydrates, dietary_fiber, total_sugars, added_sugars, cholesterol, sodium, protein,
     food_allergens!left (allergens (id, name)),
     food_dining_halls!left (dining_halls (id, name)),
     food_meal_types!left (meal_types (id, name)),
-    food_sections!left (sections (id, name))
+    food_sections!left (sections (id, name)),
+    food_dates!left (dates (id, date))
   )
 ''');
 
       // .order('date_served', ascending: false);
 
       // Filter by multiple dates
-      if (dates != null && dates.isNotEmpty) {
-        query = query.inFilter('date_served', dates);
-      }
+      // if (dates != null && dates.isNotEmpty) {
+      //   query = query.inFilter('date_served', dates);
+      // }
 
       // Filter by dining hall names
-      if (diningHalls != null && diningHalls.isNotEmpty) {
-        query = query.inFilter('foods.food_dining_halls.dining_halls.name', diningHalls);
-      }
+      // if (diningHalls != null && diningHalls.isNotEmpty) {
+      //   query = query.inFilter('foods.food_dining_halls.dining_halls.name', diningHalls);
+      // }
 
       // Filter by meal type names
-      if (mealTypes != null && mealTypes.isNotEmpty) {
-        query = query.inFilter('meal_types.name', mealTypes);
-      }
+      // if (mealTypes != null && mealTypes.isNotEmpty) {
+      //   query = query.inFilter('meal_types.name', mealTypes);
+      // }
 
       // Filter by section names
-      if (sections != null && sections.isNotEmpty) {
-        query = query.inFilter('sections.name', sections);
-      }
+      // if (sections != null && sections.isNotEmpty) {
+      //   query = query.inFilter('sections.name', sections);
+      // }
 
-      if (allergens != null && allergens.isNotEmpty) {
-        query = query.inFilter('allergens.name', allergens);
-      }
-
+      // if (allergens != null && allergens.isNotEmpty) {
+      //   query = query.inFilter('allergens.name', allergens);
+      // }
       final response = await query;
-      final test = response
+      final foods = response
           .map((food) {
             try {
               return Food.fromJson(food);
@@ -98,14 +98,52 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
               print("Error parsing food item: $food");
               print("Error details: $e");
               print("Stacktrace: $stacktrace");
-              return null; // Skip bad entries
+              return null;
             }
           })
           .whereType<Food>()
-          .toList();
+          .toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
 
-      // Convert response data into List<Food>
-      return test;
+// Remove duplicates by name while keeping the first occurrence
+      final uniqueFoods = foods
+          .fold<Map<String, Food>>({}, (map, food) {
+            map.putIfAbsent(food.name, () => food);
+            return map;
+          })
+          .values
+          .toList();
+      print(uniqueFoods);
+      return uniqueFoods;
+
+      // Merge duplicate foods before returning
+      // return mergeDuplicateFoods(foods);
+//       final Map<String, Food> foodMap = {};
+
+//       for (var food in response) {
+//         try {
+//           final parsedFood = Food.fromJson(food);
+//           if (foodMap.containsKey(parsedFood.name)) {
+//             // Merge dining halls, meal types, and sections
+//             foodMap[parsedFood.name]!.diningHalls.addAll(parsedFood.diningHalls);
+//             foodMap[parsedFood.name]!.mealTypes.addAll(parsedFood.mealTypes);
+//             foodMap[parsedFood.name]!.sections.addAll(parsedFood.sections);
+//           } else {
+//             // Store new food entry
+//             foodMap[parsedFood.name] = parsedFood;
+//           }
+//         } catch (e, stacktrace) {
+//           print("Error parsing food item: $food");
+//           print("Error details: $e");
+//           print("Stacktrace: $stacktrace");
+//         }
+//       }
+
+// // Convert the merged map back to a sorted list
+//       final res = foodMap.values.toList()..sort((a, b) => a.name.compareTo(b.name)); // Sort alphabetically
+
+//       // Convert response data into List<Food>
+//       return res;
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
@@ -228,5 +266,28 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
     } catch (e) {
       throw ServerException(e.toString());
     }
+  }
+
+  List<Food> mergeDuplicateFoods(List<Food> foods) {
+    Map<String, Food> foodMap = {};
+
+    for (var food in foods) {
+      if (foodMap.containsKey(food.name)) {
+        // Get the existing food entry
+        var existingFood = foodMap[food.name]!;
+
+        // Merge unique dining halls, meal types, and sections
+        existingFood.diningHalls = {...existingFood.diningHalls, ...food.diningHalls}.toList();
+        existingFood.mealTypes = {...existingFood.mealTypes, ...food.mealTypes}.toList();
+        existingFood.sections = {...existingFood.sections, ...food.sections}.toList();
+        existingFood.allergens = {...existingFood.allergens, ...food.allergens}.toList();
+        existingFood.dates = {...existingFood.dates, ...food.dates}.toList();
+      } else {
+        // Add the food to the map if it doesn't exist
+        foodMap[food.name] = food;
+      }
+    }
+
+    return foodMap.values.toList();
   }
 }
