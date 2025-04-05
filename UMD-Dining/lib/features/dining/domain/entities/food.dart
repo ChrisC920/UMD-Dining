@@ -15,11 +15,11 @@ class Food {
   final String cholesterol;
   final String sodium;
   final String protein;
-  final List<String> allergens;
-  final List<String> mealTypes;
-  final List<String> diningHalls;
-  final List<String> sections;
-  final List<String> dates;
+  late final List<String> allergens;
+  late final List<String> mealTypes;
+  late final List<String> diningHalls;
+  late final List<String> sections;
+  late final List<String> dates;
 
   Food({
     required this.id,
@@ -46,8 +46,8 @@ class Food {
   });
 
   factory Food.fromJson(Map<String, dynamic> json) {
-    // print("look here $json");
-    return Food(
+    //print("look here $json");
+    final parsedFood = Food(
       id: json['food_id'] ?? 0,
       name: json['foods']?['name'] ?? "Unknown",
       link: json['foods']?['link'] ?? "No URL Found",
@@ -66,12 +66,50 @@ class Food {
       protein: (json['foods']?['protein'] ?? "N/A"),
 
       // ✅ Fix: Directly extract name from objects instead of using a list
-      diningHalls:
-          json['food_dining_halls'] != null ? List<String>.from((json['food_dining_halls'] as List).map((e) => e['dining_halls']['name'] ?? "Unknown")) : [],
-      mealTypes: json['food_meal_types'] != null ? List<String>.from((json['food_meal_types'] as List).map((e) => e['meal_types']['name'] ?? "Unknown")) : [],
-      sections: json['food_sections'] != null ? List<String>.from((json['food_sections'] as List).map((e) => e['sections']['name'] ?? "Unknown")) : [],
-      allergens: json['food_allergens'] != null ? List<String>.from((json['food_allergens'] as List).map((e) => e['allergens']['name'] ?? "Unknown")) : [],
-      dates: [json['date_served'] ?? "0000-00-00"],
+      diningHalls: json['foods']?['food_dining_halls'] != null
+          ? List<String>.from((json['foods']?['food_dining_halls'] as List).map((e) => e['dining_halls']['name'] ?? "Unknown"))
+          : [],
+      mealTypes: json['foods']?['food_meal_types'] != null
+          ? List<String>.from((json['foods']?['food_meal_types'] as List).map((e) => e['meal_types']['name'] ?? "Unknown"))
+          : [],
+      sections: json['foods']?['food_sections'] != null
+          ? List<String>.from((json['foods']?['food_sections'] as List).map((e) => e['sections']['name'] ?? "Unknown"))
+          : [],
+      allergens: json['foods']?['food_allergens'] != null
+          ? List<String>.from((json['foods']?['food_allergens'] as List).map((e) => e['allergens']['name'] ?? "Unknown"))
+          : [],
+      dates: json['foods']?['food_dates'] != null ? List<String>.from((json['foods']?['food_dates'] as List).map((e) => e['dates']['date'] ?? "Unknown")) : [],
     );
+    // print("look here ${parsedFood.toString()}");
+    return parsedFood;
+  }
+
+  @override
+  String toString() {
+    return '''
+Food {
+  id: $id,
+  name: $name,
+  link: $link,
+  servingSize: $servingSize,
+  servingsPerContainer: $servingsPerContainer,
+  caloriesPerServing: $caloriesPerServing,
+  totalFat: $totalFat,
+  saturatedFat: $saturatedFat,
+  transFat: $transFat,
+  totalCarbohydrates: $totalCarbohydrates,
+  dietaryFiber: $dietaryFiber,
+  totalSugars: $totalSugars,
+  addedSugars: $addedSugars,
+  cholesterol: $cholesterol,
+  sodium: $sodium,
+  protein: $protein,
+  diningHalls: ${diningHalls.join(", ")},
+  mealTypes: ${mealTypes.join(", ")},
+  sections: ${sections.join(", ")},
+  allergens: ${allergens.join(", ")},
+  dates: ${dates.join(", ")}
+}
+''';
   }
 }
