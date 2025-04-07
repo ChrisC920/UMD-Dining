@@ -65,7 +65,8 @@ class _DiningPageState extends State<DiningPage> {
       if (query.isEmpty) {
         items = allItems; // Show all items when search is empty
       } else {
-        items = items.where((food) => food.name.toLowerCase().contains(query)).toList();
+        items =
+            items.where((food) => food.name.toLowerCase().contains(query)).where((food) => mealTypes.every((type) => food.mealTypes.contains(type))).toList();
       }
     });
   }
