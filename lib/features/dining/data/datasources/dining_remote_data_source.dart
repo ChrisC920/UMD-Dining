@@ -64,31 +64,40 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
   )
 ''');
 
-      // .order('date_served', ascending: false);
-
       // Filter by multiple dates
-      // if (dates != null && dates.isNotEmpty) {
-      //   query = query.inFilter('date_served', dates);
-      // }
+      if (dates != null && dates.isNotEmpty) {
+        final datesRes = await supabaseClient.from('dates').select('id, date').inFilter('date', dates);
+        final ids = datesRes.map((e) => e['id']).toList();
+        query = query.inFilter('date_id', ids);
+      }
 
       // Filter by dining hall names
-      // if (diningHalls != null && diningHalls.isNotEmpty) {
-      //   query = query.inFilter('foods.food_dining_halls.dining_halls.name', diningHalls);
-      // }
+      if (diningHalls != null && diningHalls.isNotEmpty) {
+        final diningHallsRes = await supabaseClient.from('dining_halls').select('id, name').inFilter('name', diningHalls);
+        final ids = diningHallsRes.map((e) => e['id']).toList();
+        query = query.inFilter('dining_hall_id', ids);
+      }
 
       // Filter by meal type names
-      // if (mealTypes != null && mealTypes.isNotEmpty) {
-      //   query = query.inFilter('meal_types.name', mealTypes);
-      // }
+      if (mealTypes != null && mealTypes.isNotEmpty) {
+        final mealTypesRes = await supabaseClient.from('meal_types').select('id, name').inFilter('name', mealTypes);
+        final ids = mealTypesRes.map((e) => e['id']).toList();
+        query = query.inFilter('meal_type_id', ids);
+      }
 
       // Filter by section names
-      // if (sections != null && sections.isNotEmpty) {
-      //   query = query.inFilter('sections.name', sections);
-      // }
+      if (sections != null && sections.isNotEmpty) {
+        final sectionsRes = await supabaseClient.from('sections').select('id, name').inFilter('name', sections);
+        final ids = sectionsRes.map((e) => e['id']).toList();
+        query = query.inFilter('section_id', ids);
+      }
 
-      // if (allergens != null && allergens.isNotEmpty) {
-      //   query = query.inFilter('allergens.name', allergens);
-      // }
+      if (allergens != null && allergens.isNotEmpty) {
+        final allergensRes = await supabaseClient.from('allergens').select('id, name').inFilter('name', allergens);
+        final ids = allergensRes.map((e) => e['id']).toList();
+        query = query.inFilter('allergen_id', ids);
+      }
+
       final response = await query;
       final foods = response
           .map((food) {
@@ -106,44 +115,48 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
         ..sort((a, b) => a.name.compareTo(b.name));
 
 // Remove duplicates by name while keeping the first occurrence
+// TODO: FIX TO ONLY FOLD ON CERTAIN CONDITIONS (for example jerk chicken appears differently in 2 dining halls)
       final uniqueFoods = foods
           .fold<Map<String, Food>>({}, (map, food) {
-            map.putIfAbsent(food.name, () => food);
+            // Use name + diningHall combo as a unique key
+            final key = '${food.name}|${food.caloriesPerServing}';
+
+            if (map.containsKey(key)) {
+              final existing = map[key]!;
+
+              map[key] = Food(
+                id: existing.id,
+                name: existing.name,
+                link: existing.link,
+                servingSize: existing.servingSize,
+                servingsPerContainer: existing.servingsPerContainer,
+                caloriesPerServing: existing.caloriesPerServing,
+                totalFat: existing.totalFat,
+                saturatedFat: existing.saturatedFat,
+                transFat: existing.transFat,
+                totalCarbohydrates: existing.totalCarbohydrates,
+                dietaryFiber: existing.dietaryFiber,
+                totalSugars: existing.totalSugars,
+                addedSugars: existing.addedSugars,
+                cholesterol: existing.cholesterol,
+                sodium: existing.sodium,
+                protein: existing.protein,
+                diningHalls: {...existing.diningHalls, ...food.diningHalls}.toSet().toList(),
+                mealTypes: {...existing.mealTypes, ...food.mealTypes}.toSet().toList(),
+                sections: {...existing.sections, ...food.sections}.toSet().toList(),
+                allergens: {...existing.allergens, ...food.allergens}.toSet().toList(),
+                dates: {...existing.dates, ...food.dates}.toSet().toList(),
+              );
+            } else {
+              map[key] = food;
+            }
+
             return map;
           })
           .values
-          .toList();
-      print(uniqueFoods);
+          .toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
       return uniqueFoods;
-
-      // Merge duplicate foods before returning
-      // return mergeDuplicateFoods(foods);
-//       final Map<String, Food> foodMap = {};
-
-//       for (var food in response) {
-//         try {
-//           final parsedFood = Food.fromJson(food);
-//           if (foodMap.containsKey(parsedFood.name)) {
-//             // Merge dining halls, meal types, and sections
-//             foodMap[parsedFood.name]!.diningHalls.addAll(parsedFood.diningHalls);
-//             foodMap[parsedFood.name]!.mealTypes.addAll(parsedFood.mealTypes);
-//             foodMap[parsedFood.name]!.sections.addAll(parsedFood.sections);
-//           } else {
-//             // Store new food entry
-//             foodMap[parsedFood.name] = parsedFood;
-//           }
-//         } catch (e, stacktrace) {
-//           print("Error parsing food item: $food");
-//           print("Error details: $e");
-//           print("Stacktrace: $stacktrace");
-//         }
-//       }
-
-// // Convert the merged map back to a sorted list
-//       final res = foodMap.values.toList()..sort((a, b) => a.name.compareTo(b.name)); // Sort alphabetically
-
-//       // Convert response data into List<Food>
-//       return res;
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
@@ -290,4 +303,35 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
 
     return foodMap.values.toList();
   }
+}
+
+bool isMergeable(Food a, Food b) {
+  return a.link == b.link && a.caloriesPerServing == b.caloriesPerServing && a.servingSize == b.servingSize;
+  // Add any other checks for nutritional equivalence here
+}
+
+Food mergeFoods(Food a, Food b) {
+  return Food(
+    id: a.id,
+    name: a.name,
+    link: a.link,
+    servingSize: a.servingSize,
+    servingsPerContainer: a.servingsPerContainer,
+    caloriesPerServing: a.caloriesPerServing,
+    totalFat: a.totalFat,
+    saturatedFat: a.saturatedFat,
+    transFat: a.transFat,
+    totalCarbohydrates: a.totalCarbohydrates,
+    dietaryFiber: a.dietaryFiber,
+    totalSugars: a.totalSugars,
+    addedSugars: a.addedSugars,
+    cholesterol: a.cholesterol,
+    sodium: a.sodium,
+    protein: a.protein,
+    diningHalls: {...a.diningHalls, ...b.diningHalls}.toSet().toList(),
+    mealTypes: {...a.mealTypes, ...b.mealTypes}.toSet().toList(),
+    sections: {...a.sections, ...b.sections}.toSet().toList(),
+    allergens: {...a.allergens, ...b.allergens}.toSet().toList(),
+    dates: {...a.dates, ...b.dates}.toSet().toList(),
+  );
 }
