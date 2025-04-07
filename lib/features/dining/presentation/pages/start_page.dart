@@ -23,9 +23,7 @@ class StartPage extends StatelessWidget {
               onTap: () => {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          const DiningPage(diningHall: ['251 North'])),
+                  MaterialPageRoute(builder: (context) => const DiningPage(diningHall: ['251 North'])),
                 ),
               },
               child: Stack(
@@ -52,9 +50,7 @@ class StartPage extends StatelessWidget {
               onTap: () => {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          const DiningPage(diningHall: ['Yahentamitsi'])),
+                  MaterialPageRoute(builder: (context) => const DiningPage(diningHall: ['Yahentamitsi'])),
                 ),
               },
               child: Stack(
@@ -81,9 +77,7 @@ class StartPage extends StatelessWidget {
               onTap: () => {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          const DiningPage(diningHall: ['South Campus'])),
+                  MaterialPageRoute(builder: (context) => const DiningPage(diningHall: ['South'])),
                 ),
               },
               child: Stack(
@@ -110,12 +104,7 @@ class StartPage extends StatelessWidget {
               onTap: () => {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const DiningPage(diningHall: [
-                            '251 North',
-                            'South Campus',
-                            'Yahentamitsi'
-                          ])),
+                  MaterialPageRoute(builder: (context) => const DiningPage(diningHall: [])),
                 ),
               },
               child: Stack(
