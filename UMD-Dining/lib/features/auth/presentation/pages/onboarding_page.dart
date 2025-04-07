@@ -55,6 +55,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
   bool likesAfrican = false;
   bool likesMiddleEastern = false;
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+  }
+
   void _nextPage() {
     if (_currentPage < _totalPages) {
       setState(() {
