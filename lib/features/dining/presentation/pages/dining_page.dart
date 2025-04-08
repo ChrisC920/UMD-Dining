@@ -178,7 +178,7 @@ class _DiningPageState extends State<DiningPage> {
                 },
                 builder: (context, state) {
                   if (state is DiningLoading && items.isEmpty) {
-                    return const Center(child: CircularProgressIndicator()); // Show loading only when empty
+                    return const Expanded(child: Center(child: CircularProgressIndicator())); // Show loading only when empty
                   }
 
                   if (items.isEmpty) {
