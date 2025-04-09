@@ -8,6 +8,7 @@ import 'package:flutter_moving_background/flutter_moving_background.dart';
 import 'package:gif/gif.dart';
 import 'package:umd_dining_refactor/core/common/widgets/loader.dart';
 import 'package:umd_dining_refactor/core/constants/constants.dart';
+import 'package:umd_dining_refactor/core/utils/show_snackbar.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/pages/onboarding_page.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/widgets/apple_sign_in_button.dart';
@@ -76,7 +77,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                     child: BlocConsumer<AuthBloc, AuthState>(
                       listener: (context, state) {
                         if (state is AuthFailure) {
-                          print(state.message);
+                          showSnackBar(context, state.message);
                         } else if (state is AuthSuccess) {
                           // Future.delayed(const Duration(seconds: 6), () {
                           //   _updateCurrentPageIndex(1);
@@ -107,7 +108,6 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(45),
                                   color: Colors.transparent,
-                                  // TODO: I want to preview the app here
                                 ),
                                 alignment: Alignment.center,
                                 height: 350,

@@ -106,12 +106,15 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
           .map((food) {
             try {
               return Food.fromJson(food);
-            } catch (e, stacktrace) {
-              print("Error parsing food item: $food");
-              print("Error details: $e");
-              print("Stacktrace: $stacktrace");
+            } catch (e) {
               return null;
             }
+            // } catch (e, stacktrace) {
+            // print("Error parsing food item: $food");
+            // print("Error details: $e");
+            // print("Stacktrace: $stacktrace");
+            //   return null;
+            // }
           })
           .whereType<Food>()
           .toList()
@@ -309,10 +312,10 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
   @override
   Future<void> addFavoriteFood({required int foodId}) async {
     try {
-      await supabaseClient.from('user_favorites').insert({
+      await supabaseClient.from('user_favorites').upsert({
         'user_id': supabaseClient.auth.currentUser!.id,
         'food_id': foodId,
-      });
+      }, onConflict: 'user_id, food_id', ignoreDuplicates: true);
     } on ServerException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
@@ -323,10 +326,15 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
   @override
   Future<void> deleteFavoriteFood({required int foodId}) async {
     try {
-      await supabaseClient.from('user_favorites').delete().match({
-        'user_id': supabaseClient.auth.currentUser!.id,
+      final userId = supabaseClient.auth.currentUser?.id;
+      if (userId == null) throw Exception("No user logged in");
+
+      final response = await supabaseClient.from('user_favorites').delete().match({
+        'user_id': userId,
         'food_id': foodId,
       });
+
+      print("✅ Successfully deleted favorite: $foodId for user: $userId");
     } on ServerException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
@@ -354,12 +362,15 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
           .map((food) {
             try {
               return Food.fromJson(food);
-            } catch (e, stacktrace) {
-              print("Error parsing food item: $food");
-              print("Error details: $e");
-              print("Stacktrace: $stacktrace");
+            } catch (e) {
               return null;
             }
+            // } catch (e, stacktrace) {
+            //   print("Error parsing food item: $food");
+            //   print("Error details: $e");
+            //   print("Stacktrace: $stacktrace");
+            //   return null;
+            // }
           })
           .whereType<Food>()
           .toList()
@@ -405,7 +416,6 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
           .values
           .toList()
         ..sort((a, b) => a.name.compareTo(b.name));
-      print(uniqueFoods);
       return uniqueFoods;
     } on ServerException catch (e) {
       throw ServerException(e.message);
