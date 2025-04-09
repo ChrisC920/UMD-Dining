@@ -144,6 +144,21 @@ void _initDining() {
         serviceLocator(),
       ),
     )
+    ..registerFactory(
+      () => AddFavoriteFood(
+        serviceLocator(),
+      ),
+    )
+    ..registerFactory(
+      () => DeleteFavoriteFood(
+        serviceLocator(),
+      ),
+    )
+    ..registerFactory(
+      () => FetchFavoriteFoods(
+        serviceLocator(),
+      ),
+    )
 
     // Bloc
     ..registerLazySingleton(
@@ -153,6 +168,9 @@ void _initDining() {
         getFoodQuery: serviceLocator(),
         getFoodDetails: serviceLocator(),
         getFoodsByFilters: serviceLocator(),
+        addFavoriteFood: serviceLocator(),
+        deleteFavoriteFood: serviceLocator(),
+        fetchFavoriteFoods: serviceLocator(),
       ),
     );
 }

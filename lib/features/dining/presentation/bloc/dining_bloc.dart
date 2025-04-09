@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:umd_dining_refactor/core/usecases/usecase.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/dining.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
+import 'package:umd_dining_refactor/features/dining/domain/usecases/add_favorite_food.dart';
+import 'package:umd_dining_refactor/features/dining/domain/usecases/delete_favorite_food.dart';
+import 'package:umd_dining_refactor/features/dining/domain/usecases/fetch_favorite_foods.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_all_food_items.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food_details.dart';
@@ -16,6 +20,9 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
   final GetFoodQuery _getFoodQuery;
   final GetFoodDetails _getFoodDetails;
   final GetFoodsByFilters _getFoodsByFilters;
+  final AddFavoriteFood _addFavoriteFood;
+  final DeleteFavoriteFood _deleteFavoriteFood;
+  final FetchFavoriteFoods _fetchFavoriteFoods;
 
   DiningBloc({
     required GetAllFoods getAllFoods,
@@ -23,11 +30,17 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
     required GetFoodQuery getFoodQuery,
     required GetFoodDetails getFoodDetails,
     required GetFoodsByFilters getFoodsByFilters,
+    required AddFavoriteFood addFavoriteFood,
+    required DeleteFavoriteFood deleteFavoriteFood,
+    required FetchFavoriteFoods fetchFavoriteFoods,
   })  : _getAllFoods = getAllFoods,
         _getFood = getFood,
         _getFoodQuery = getFoodQuery,
         _getFoodDetails = getFoodDetails,
         _getFoodsByFilters = getFoodsByFilters,
+        _addFavoriteFood = addFavoriteFood,
+        _deleteFavoriteFood = deleteFavoriteFood,
+        _fetchFavoriteFoods = fetchFavoriteFoods,
         super(DiningInitial()) {
     on<DiningEvent>((event, emit) => emit(DiningLoading()));
     on<DiningFetchAllFoods>(_onFetchAllFoods);
@@ -35,6 +48,51 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
     on<DiningFetchFoodQuery>(_onFetchFoodQuery);
     on<FoodFetchFoodDetails>(_onFetchFoodDetails);
     on<FoodFetchFoodsByFilters>(_onFetchFoodsByFilters);
+    on<AddFavoriteFoodEvent>(_onAddFavoriteFood);
+    on<DeleteFavoriteFoodEvent>(_onDeleteFavoriteFood);
+    on<FetchFavoriteFoodsEvent>(_onFetchFavoriteFoods);
+  }
+
+  void _onFetchFavoriteFoods(
+    FetchFavoriteFoodsEvent event,
+    Emitter<DiningState> emit,
+  ) async {
+    emit(FavoriteFoodsLoading());
+
+    final res = await _fetchFavoriteFoods(NoParams());
+
+    res.fold(
+      (l) => emit(FavoriteFoodsFailure(l.message)),
+      (r) => emit(FetchFavoriteFoodsSuccess(r)),
+    );
+  }
+
+  void _onDeleteFavoriteFood(
+    DeleteFavoriteFoodEvent event,
+    Emitter<DiningState> emit,
+  ) async {
+    emit(FavoriteFoodsLoading());
+
+    final res = await _deleteFavoriteFood(DeleteFavoriteFoodParams(event.foodId));
+
+    res.fold(
+      (l) => emit(FavoriteFoodsFailure(l.message)),
+      (_) => emit(DeleteFavoriteFoodSuccess()),
+    );
+  }
+
+  void _onAddFavoriteFood(
+    AddFavoriteFoodEvent event,
+    Emitter<DiningState> emit,
+  ) async {
+    emit(FavoriteFoodsLoading());
+
+    final res = await _addFavoriteFood(AddFavoriteFoodParams(event.foodId));
+
+    res.fold(
+      (l) => emit(FavoriteFoodsFailure(l.message)),
+      (_) => emit(AddFavoriteFoodSuccess()),
+    );
   }
 
   void _onFetchFoodsByFilters(

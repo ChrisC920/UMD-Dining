@@ -29,14 +29,19 @@ class _DiningPageState extends State<DiningPage> {
   List<Food> items = [];
   List<Food> searchHistory = [];
   List<String> selectedMealTypes = [];
+  List<Food> favoriteFoods = [];
   int currentPageIndex = 1;
 
   @override
   void initState() {
     super.initState();
-    context.read<DiningBloc>().add(FoodFetchFoodsByFilters(
-          diningHalls: diningHall,
-        ));
+    if (currentPageIndex == 1) {
+      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(
+            diningHalls: diningHall,
+          ));
+    } else if (currentPageIndex == 2) {
+      context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
+    }
     setState(() {
       currentPageIndex = 1;
     });
@@ -90,6 +95,13 @@ class _DiningPageState extends State<DiningPage> {
     setState(() {
       currentPageIndex = index;
     });
+    if (index == 1) {
+      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(
+            diningHalls: diningHall,
+          ));
+    } else if (index == 2) {
+      context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
+    }
   }
 
   @override
@@ -192,6 +204,7 @@ class _DiningPageState extends State<DiningPage> {
                         return ListTile(
                           title: Text(food.name),
                           onTap: () {
+                            context.read<DiningBloc>().add(AddFavoriteFoodEvent(foodId: food.id));
                             Navigator.push(
                               context,
                               FoodPage.route(food),
@@ -205,10 +218,49 @@ class _DiningPageState extends State<DiningPage> {
               ),
             ],
           ),
-          Container(
-            width: 100,
-            height: 100,
-            color: Colors.blue,
+          Column(
+            children: [
+              BlocConsumer<DiningBloc, DiningState>(
+                listener: (context, state) {
+                  if (state is FavoriteFoodsFailure) {
+                    showSnackBar(context, state.error);
+                  }
+                  if (state is FetchFavoriteFoodsSuccess) {
+                    print(state.foods);
+                    setState(() {
+                      favoriteFoods = state.foods;
+                    });
+                  }
+                },
+                builder: (context, state) {
+                  if (state is FavoriteFoodsLoading && items.isEmpty) {
+                    return const Expanded(child: Center(child: CircularProgressIndicator())); // Show loading only when empty
+                  }
+
+                  if (favoriteFoods.isEmpty) {
+                    return const Center(child: Text("No foods found."));
+                  }
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: favoriteFoods.length > 200 ? 200 : favoriteFoods.length,
+                      itemBuilder: (context, index) {
+                        final food = favoriteFoods[index];
+                        return ListTile(
+                          title: Text(food.name),
+                          onTap: () {
+                            context.read<DiningBloc>().add(AddFavoriteFoodEvent(foodId: food.id));
+                            Navigator.push(
+                              context,
+                              FoodPage.route(food),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ][currentPageIndex],
       ),
