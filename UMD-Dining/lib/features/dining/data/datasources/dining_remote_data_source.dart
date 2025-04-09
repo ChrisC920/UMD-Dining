@@ -36,6 +36,9 @@ abstract interface class DiningRemoteDataSource {
     List<String>? sections,
     List<String>? allergens,
   });
+  Future<void> addFavoriteFood({required int foodId});
+  Future<void> deleteFavoriteFood({required int foodId});
+  Future<List<Food>> fetchFavoriteFoods();
 }
 
 class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
@@ -115,7 +118,6 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
         ..sort((a, b) => a.name.compareTo(b.name));
 
 // Remove duplicates by name while keeping the first occurrence
-// TODO: FIX TO ONLY FOLD ON CERTAIN CONDITIONS (for example jerk chicken appears differently in 2 dining halls)
       final uniqueFoods = foods
           .fold<Map<String, Food>>({}, (map, food) {
             // Use name + diningHall combo as a unique key
@@ -302,6 +304,114 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
     }
 
     return foodMap.values.toList();
+  }
+
+  @override
+  Future<void> addFavoriteFood({required int foodId}) async {
+    try {
+      await supabaseClient.from('user_favorites').insert({
+        'user_id': supabaseClient.auth.currentUser!.id,
+        'food_id': foodId,
+      });
+    } on ServerException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> deleteFavoriteFood({required int foodId}) async {
+    try {
+      await supabaseClient.from('user_favorites').delete().match({
+        'user_id': supabaseClient.auth.currentUser!.id,
+        'food_id': foodId,
+      });
+    } on ServerException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<List<Food>> fetchFavoriteFoods() async {
+    try {
+      final query = supabaseClient.from('user_favorites').select('''
+    food_id,
+    foods!inner (
+      id, name, link, serving_size, servings_per_container, calories_per_serving, total_fat, saturated_fat, trans_fat,
+      total_carbohydrates, dietary_fiber, total_sugars, added_sugars, cholesterol, sodium, protein,
+      food_allergens!left (allergens (id, name)),
+      food_dining_halls!left (dining_halls (id, name)),
+      food_meal_types!left (meal_types (id, name)),
+      food_sections!left (sections (id, name)),
+      food_dates!left (dates (id, date))
+    )
+  ''').eq('user_id', supabaseClient.auth.currentUser!.id);
+      final response = await query;
+      final foods = response
+          .map((food) {
+            try {
+              return Food.fromJson(food);
+            } catch (e, stacktrace) {
+              print("Error parsing food item: $food");
+              print("Error details: $e");
+              print("Stacktrace: $stacktrace");
+              return null;
+            }
+          })
+          .whereType<Food>()
+          .toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+
+// Remove duplicates by name while keeping the first occurrence
+      final uniqueFoods = foods
+          .fold<Map<String, Food>>({}, (map, food) {
+            final key = '${food.name}|${food.caloriesPerServing}';
+
+            if (map.containsKey(key)) {
+              final existing = map[key]!;
+
+              map[key] = Food(
+                id: existing.id,
+                name: existing.name,
+                link: existing.link,
+                servingSize: existing.servingSize,
+                servingsPerContainer: existing.servingsPerContainer,
+                caloriesPerServing: existing.caloriesPerServing,
+                totalFat: existing.totalFat,
+                saturatedFat: existing.saturatedFat,
+                transFat: existing.transFat,
+                totalCarbohydrates: existing.totalCarbohydrates,
+                dietaryFiber: existing.dietaryFiber,
+                totalSugars: existing.totalSugars,
+                addedSugars: existing.addedSugars,
+                cholesterol: existing.cholesterol,
+                sodium: existing.sodium,
+                protein: existing.protein,
+                diningHalls: {...existing.diningHalls, ...food.diningHalls}.toSet().toList(),
+                mealTypes: {...existing.mealTypes, ...food.mealTypes}.toSet().toList(),
+                sections: {...existing.sections, ...food.sections}.toSet().toList(),
+                allergens: {...existing.allergens, ...food.allergens}.toSet().toList(),
+                dates: {...existing.dates, ...food.dates}.toSet().toList(),
+              );
+            } else {
+              map[key] = food;
+            }
+
+            return map;
+          })
+          .values
+          .toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+      print(uniqueFoods);
+      return uniqueFoods;
+    } on ServerException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
   }
 }
 

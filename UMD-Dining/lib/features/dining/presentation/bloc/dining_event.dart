@@ -90,3 +90,21 @@ final class FoodFetchFoodDetails extends DiningEvent {
     required this.foodId,
   });
 }
+
+final class AddFavoriteFoodEvent extends DiningEvent {
+  final int foodId;
+
+  AddFavoriteFoodEvent({
+    required this.foodId,
+  });
+}
+
+final class DeleteFavoriteFoodEvent extends DiningEvent {
+  final int foodId;
+
+  DeleteFavoriteFoodEvent({
+    required this.foodId,
+  });
+}
+
+final class FetchFavoriteFoodsEvent extends DiningEvent {}
