@@ -204,7 +204,8 @@ class _DiningPageState extends State<DiningPage> {
                         return ListTile(
                           title: Text(food.name),
                           onTap: () {
-                            context.read<DiningBloc>().add(AddFavoriteFoodEvent(foodId: food.id));
+                            context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
+
                             Navigator.push(
                               context,
                               FoodPage.route(food),
@@ -224,9 +225,9 @@ class _DiningPageState extends State<DiningPage> {
                 listener: (context, state) {
                   if (state is FavoriteFoodsFailure) {
                     showSnackBar(context, state.error);
+                    print(state.error);
                   }
                   if (state is FetchFavoriteFoodsSuccess) {
-                    print(state.foods);
                     setState(() {
                       favoriteFoods = state.foods;
                     });
@@ -248,7 +249,6 @@ class _DiningPageState extends State<DiningPage> {
                         return ListTile(
                           title: Text(food.name),
                           onTap: () {
-                            context.read<DiningBloc>().add(AddFavoriteFoodEvent(foodId: food.id));
                             Navigator.push(
                               context,
                               FoodPage.route(food),

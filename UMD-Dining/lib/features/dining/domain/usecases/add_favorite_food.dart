@@ -1,4 +1,4 @@
-import 'package:fpdart/src/either.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:umd_dining_refactor/core/errors/failures.dart';
 import 'package:umd_dining_refactor/core/usecases/usecase.dart';
 import 'package:umd_dining_refactor/features/dining/domain/repositories/dining_repository.dart';
