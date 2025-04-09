@@ -4,12 +4,21 @@ import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
 
 class FoodPage extends StatefulWidget {
-  static route(Food food) => MaterialPageRoute(
-        builder: (context) => FoodPage(food: food),
+  static route(Food food, List<Food> favoriteFoods) => MaterialPageRoute(
+        builder: (context) => FoodPage(
+          food: food,
+          favoriteFoods: favoriteFoods,
+        ),
       );
 
   final Food food;
-  const FoodPage({super.key, required this.food});
+  final List<Food> favoriteFoods; // 👈 New
+
+  const FoodPage({
+    super.key,
+    required this.food,
+    required this.favoriteFoods,
+  });
 
   @override
   State<FoodPage> createState() => _FoodPageState();
@@ -21,12 +30,7 @@ class _FoodPageState extends State<FoodPage> {
   @override
   void initState() {
     super.initState();
-    final state = context.read<DiningBloc>().state;
-    if (state is FetchFavoriteFoodsSuccess) {
-      isFavorite = state.foods.any((f) => f.id == widget.food.id);
-    } else {
-      isFavorite = false;
-    }
+    isFavorite = widget.favoriteFoods.any((f) => f.id == widget.food.id);
   }
 
   void toggleFavorite() {
