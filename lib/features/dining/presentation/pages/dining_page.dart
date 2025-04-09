@@ -208,7 +208,7 @@ class _DiningPageState extends State<DiningPage> {
 
                             Navigator.push(
                               context,
-                              FoodPage.route(food),
+                              FoodPage.route(food, favoriteFoods),
                             );
                           },
                         );
@@ -251,7 +251,7 @@ class _DiningPageState extends State<DiningPage> {
                           onTap: () {
                             Navigator.push(
                               context,
-                              FoodPage.route(food),
+                              FoodPage.route(food, favoriteFoods),
                             );
                           },
                         );
