@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:umd_dining_refactor/core/utils/show_snackbar.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
@@ -33,6 +34,7 @@ class _DiningPageState extends State<DiningPage> {
   Set<String> selectedMealTypes = <String>{};
   Set<String> selectedAllergens = <String>{};
   Set<String> selectedDietaryPreferences = <String>{};
+  DateTime? selectedDate = DateTime.now();
   int currentPageIndex = 1;
 
   @override
@@ -58,58 +60,24 @@ class _DiningPageState extends State<DiningPage> {
     _searchController.dispose();
   }
 
-  void search(String query, List<String> mealTypes) {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      if (query.isEmpty) {
-        items = allItems; // Show all items when search is empty
-      } else {
-        items =
-            items.where((food) => food.name.toLowerCase().contains(query)).where((food) => mealTypes.every((type) => food.mealTypes.contains(type))).toList();
-      }
-    });
-  }
-
   Timer? _debounce;
 
   void _filterItems() {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(const Duration(milliseconds: 300), () {
-      final query = _searchController.text.toLowerCase();
-      setState(() {
-        items = allItems
-            .where((food) =>
-                food.name.toLowerCase().contains(query) &&
-                selectedMealTypes.every((type) => food.mealTypes.contains(type)) &&
-                selectedDietaryPreferences.every((pref) => convertAllergenList(food.allergens).contains(pref)) &&
-                selectedAllergens.every((allergen) => !convertAllergenList(food.allergens).contains(allergen)))
-            .toList();
-      });
+    // if (_debounce?.isActive ?? false) _debounce!.cancel();
+    // _debounce = Timer(const Duration(milliseconds: 300), () {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      items = allItems
+          .where((food) =>
+              food.name.toLowerCase().contains(query) &&
+              selectedMealTypes.every((type) => food.mealTypes.contains(type)) &&
+              selectedDietaryPreferences.every((pref) => convertAllergenList(food.allergens).contains(pref)) &&
+              selectedAllergens.every((allergen) => !convertAllergenList(food.allergens).contains(allergen)) &&
+              (selectedDate != null ? food.dates.contains(DateFormat('yyyy-MM-dd').format(selectedDate!)) : true))
+          .toList();
     });
+    // });
   }
-
-  // void _filterItems() {
-  //   final query = _searchController.text.toLowerCase();
-
-  //   setState(() {
-  //     items = allItems.where((food) {
-  //       print(food.allergens);
-  //       // ✅ Text search match
-  //       final matchesQuery = food.name.toLowerCase().contains(query);
-
-  //       // ✅ Meal types: All selected meal types must be in food's mealTypes
-  //       final matchesMealTypes = selectedMealTypes.every((type) => food.mealTypes.contains(type));
-
-  //       // ✅ Allergens: food must NOT contain any selected allergen
-  //       final excludesAllergens = selectedAllergens.every((allergen) => !convertAllergenList(food.allergens).contains(allergen));
-
-  //       // ✅ Dietary preferences: each selected preference must match
-  //       final matchesDietPrefs = selectedDietaryPreferences.every((pref) => convertAllergenList(food.allergens).contains(pref));
-
-  //       return matchesQuery && matchesMealTypes && excludesAllergens && matchesDietPrefs;
-  //     }).toList();
-  //   });
-  // }
 
   List<String> convertAllergenList(List<String> allergens) {
     return allergens.map((e) => convertAllergen(e)).toList();
@@ -254,11 +222,13 @@ class _DiningPageState extends State<DiningPage> {
                               selectedAllergens: selectedAllergens,
                               selectedMealTypes: selectedMealTypes,
                               selectedDietaryPreferences: selectedDietaryPreferences,
-                              onApply: (allergens, mealTypes, dietaryPreferences) {
+                              selectedDate: selectedDate,
+                              onApply: (allergens, mealTypes, dietaryPreferences, date) {
                                 setState(() {
                                   selectedAllergens = allergens;
                                   selectedMealTypes = mealTypes;
                                   selectedDietaryPreferences = dietaryPreferences;
+                                  selectedDate = date;
                                 });
                                 _filterItems();
                               },
@@ -279,6 +249,7 @@ class _DiningPageState extends State<DiningPage> {
                     setState(() {
                       items = state.foods; // Update list when data is fetched
                       allItems = List.from(state.foods);
+                      _filterItems();
                     });
                   }
                 },
@@ -298,14 +269,17 @@ class _DiningPageState extends State<DiningPage> {
                         return ListTile(
                           title: Text(
                             food.name,
-                            style: const TextStyle(fontFamily: 'Helvetica'),
+                            style: const TextStyle(
+                              fontFamily: 'Helvetica',
+                              fontSize: 16,
+                            ),
                           ),
                           onTap: () {
                             context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
 
                             Navigator.push(
                               context,
-                              FoodPage.route(food, favoriteFoods),
+                              FoodPage.route(food, favoriteFoods, diningHall!),
                             );
                           },
                         );
@@ -347,7 +321,7 @@ class _DiningPageState extends State<DiningPage> {
                           onTap: () {
                             Navigator.push(
                               context,
-                              FoodPage.route(food, favoriteFoods),
+                              FoodPage.route(food, favoriteFoods, diningHall!),
                             );
                           },
                         );
