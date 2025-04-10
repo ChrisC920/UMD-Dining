@@ -69,228 +69,237 @@ class _FilterCardState extends State<FilterCard> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header with title and close button
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                const Center(
-                  child: Text(
-                    'Filter Options',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Helvetica',
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.close_sharp,
-                      size: 24,
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ),
-              ],
-            ),
+            _cardHeader(context),
             const Divider(height: 30, thickness: 1),
-
-            // Meal Types
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text("Meals", style: Theme.of(context).textTheme.titleMedium),
-            ),
+            FilterCardTextLabel(text: "Meal"),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: mealTypes.map((meal) {
-                final selected = selectedMealTypes.contains(meal);
-                return ChoiceChip(
-                  showCheckmark: false,
-                  label: Text(
-                    meal,
-                    style: TextStyle(
-                      color: selected ? Colors.black : Colors.white,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                    ),
-                  ),
-                  selected: selected,
-                  selectedColor: Colors.white, // Color when selected
-                  onSelected: (_) {
-                    setState(() {
-                      selected ? selectedMealTypes.remove(meal) : selectedMealTypes.add(meal);
-                      widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
-                    });
-                  },
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: 2,
-                );
-              }).toList(),
-            ),
-
+            _mealTypeOptions(),
             const Divider(height: 30, thickness: 1),
-            // Allergens
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Dietary Preferences",
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-
-            Wrap(
-              spacing: 8,
-              children: dietaryPreferences.map((dietaryPreference) {
-                return SizedBox(
-                  width: MediaQuery.of(context).size.width / 2 - 32, // half width minus padding
-                  child: CheckboxListTile(
-                    title: Text(dietaryPreference, style: Theme.of(context).textTheme.titleMedium),
-                    value: selectedDietaryPreferences.contains(dietaryPreference),
-                    onChanged: (bool? value) {
-                      setState(() {
-                        if (value == true) {
-                          selectedDietaryPreferences.add(dietaryPreference);
-                        } else {
-                          selectedDietaryPreferences.remove(dietaryPreference);
-                        }
-                        widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
-                      });
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                    dense: true,
-                    visualDensity: VisualDensity.compact,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                );
-              }).toList(),
-            ),
-
+            FilterCardTextLabel(text: "Dietary Preferences"),
+            _dietaryPreferencesOptions(context),
             const Divider(height: 30, thickness: 1),
-            // Allergens
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Exclude items containing...",
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-
-            Wrap(
-              spacing: 8,
-              children: allergens.map((allergen) {
-                return SizedBox(
-                  width: MediaQuery.of(context).size.width / 2 - 32, // half width minus padding
-                  child: CheckboxListTile(
-                    title: Text(allergen, style: Theme.of(context).textTheme.titleMedium),
-                    value: selectedAllergens.contains(allergen),
-                    onChanged: (bool? value) {
-                      setState(() {
-                        if (value == true) {
-                          selectedAllergens.add(allergen);
-                        } else {
-                          selectedAllergens.remove(allergen);
-                        }
-                        widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
-                      });
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                    dense: true,
-                    visualDensity: VisualDensity.compact,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                );
-              }).toList(),
-            ),
+            FilterCardTextLabel(text: "Exclude items containing..."),
+            _allergenOptions(context),
             const Divider(height: 30, thickness: 1),
-
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Filter by Date",
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-
+            FilterCardTextLabel(text: "Filter by Date"),
+            _dateOptions(context),
+            const Divider(height: 30, thickness: 1),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  selectedDate != null ? DateFormat('EEEE, MMMM d').format(selectedDate!) : 'No date selected',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Row(
-                  children: [
-                    TextButton(
-                      onPressed: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: selectedDate,
-                          firstDate: DateTime(2025, 4, 3),
-                          lastDate: DateTime.now(),
-                        );
-                        if (picked != null) {
-                          setState(() {
-                            selectedDate = picked;
-                          });
-                        }
-                      },
-                      child: const Text("Choose Date", style: TextStyle(fontSize: 16)),
-                    ),
-                    if (selectedDate != null)
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            selectedDate = null;
-                          });
-                        },
-                        child: const Text("Clear", style: TextStyle(fontSize: 16)),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-
-            const Divider(height: 30, thickness: 1),
-
-            // Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                OutlinedButton(
-                  onPressed: () {
-                    setState(() {
-                      selectedAllergens.clear();
-                      selectedMealTypes.clear();
-                      selectedDietaryPreferences.clear();
-                      selectedDate = null;
-                      widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
-                    });
-                  },
-                  child: const Text(
-                    'Clear',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Apply', style: TextStyle(fontSize: 16)),
-                ),
+                _clearButton(),
+                _applyButton(context),
               ],
             )
           ],
         ),
       ),
+    );
+  }
+
+  ElevatedButton _applyButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
+        Navigator.pop(context);
+      },
+      child: const Text('Apply', style: TextStyle(fontSize: 16)),
+    );
+  }
+
+  OutlinedButton _clearButton() {
+    return OutlinedButton(
+      onPressed: () {
+        setState(() {
+          selectedAllergens.clear();
+          selectedMealTypes.clear();
+          selectedDietaryPreferences.clear();
+          selectedDate = null;
+          widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
+        });
+      },
+      child: const Text(
+        'Clear',
+        style: TextStyle(fontSize: 16),
+      ),
+    );
+  }
+
+  Row _dateOptions(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          selectedDate != null ? DateFormat('EEEE, MMMM d').format(selectedDate!) : 'No date selected',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        Row(
+          children: [
+            TextButton(
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: selectedDate,
+                  firstDate: DateTime(2025, 4, 3),
+                  lastDate: DateTime.now(),
+                );
+                if (picked != null) {
+                  setState(() {
+                    selectedDate = picked;
+                  });
+                }
+              },
+              child: const Text("Choose Date", style: TextStyle(fontSize: 16)),
+            ),
+            if (selectedDate != null)
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    selectedDate = null;
+                  });
+                },
+                child: const Text("Clear", style: TextStyle(fontSize: 16)),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Wrap _allergenOptions(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      children: allergens.map((allergen) {
+        return SizedBox(
+          width: MediaQuery.of(context).size.width / 2 - 32, // half width minus padding
+          child: CheckboxListTile(
+            title: Text(allergen, style: Theme.of(context).textTheme.titleMedium),
+            value: selectedAllergens.contains(allergen),
+            onChanged: (bool? value) {
+              setState(() {
+                if (value == true) {
+                  selectedAllergens.add(allergen);
+                } else {
+                  selectedAllergens.remove(allergen);
+                }
+                widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
+              });
+            },
+            controlAffinity: ListTileControlAffinity.leading,
+            dense: true,
+            visualDensity: VisualDensity.compact,
+            contentPadding: EdgeInsets.zero,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Wrap _dietaryPreferencesOptions(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      children: dietaryPreferences.map((dietaryPreference) {
+        return SizedBox(
+          width: MediaQuery.of(context).size.width / 2 - 32, // half width minus padding
+          child: CheckboxListTile(
+            title: Text(dietaryPreference, style: Theme.of(context).textTheme.titleMedium),
+            value: selectedDietaryPreferences.contains(dietaryPreference),
+            onChanged: (bool? value) {
+              setState(() {
+                if (value == true) {
+                  selectedDietaryPreferences.add(dietaryPreference);
+                } else {
+                  selectedDietaryPreferences.remove(dietaryPreference);
+                }
+                widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
+              });
+            },
+            controlAffinity: ListTileControlAffinity.leading,
+            dense: true,
+            visualDensity: VisualDensity.compact,
+            contentPadding: EdgeInsets.zero,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Wrap _mealTypeOptions() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: mealTypes.map((meal) {
+        final selected = selectedMealTypes.contains(meal);
+        return ChoiceChip(
+          showCheckmark: false,
+          label: Text(
+            meal,
+            style: TextStyle(
+              color: selected ? Colors.black : Colors.white,
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+            ),
+          ),
+          selected: selected,
+          selectedColor: Colors.white, // Color when selected
+          onSelected: (_) {
+            setState(() {
+              selected ? selectedMealTypes.remove(meal) : selectedMealTypes.add(meal);
+              widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
+            });
+          },
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          elevation: 2,
+        );
+      }).toList(),
+    );
+  }
+
+  Stack _cardHeader(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        const Center(
+          child: Text(
+            'Filter Options',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Helvetica',
+            ),
+          ),
+        ),
+        Positioned(
+          right: 0,
+          child: IconButton(
+            icon: const Icon(
+              Icons.close_sharp,
+              size: 24,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class FilterCardTextLabel extends StatelessWidget {
+  String text;
+  FilterCardTextLabel({
+    super.key,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(text, style: Theme.of(context).textTheme.titleMedium),
     );
   }
 }
