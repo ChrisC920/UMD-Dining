@@ -23,10 +23,7 @@ import 'package:umd_dining_refactor/features/dining/domain/repositories/dining_r
 import 'package:umd_dining_refactor/features/dining/domain/usecases/add_favorite_food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/delete_favorite_food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/fetch_favorite_foods.dart';
-import 'package:umd_dining_refactor/features/dining/domain/usecases/get_all_food_items.dart';
-import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food_details.dart';
-import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food_query.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_foods_by_query.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
 

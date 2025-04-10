@@ -39,9 +39,7 @@ class _DiningPageState extends State<DiningPage> {
   void initState() {
     super.initState();
     if (currentPageIndex == 1) {
-      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(
-            diningHalls: diningHall,
-          ));
+      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall));
     } else if (currentPageIndex == 2) {
       context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
     }
@@ -112,9 +110,7 @@ class _DiningPageState extends State<DiningPage> {
       currentPageIndex = index;
     });
     if (index == 1) {
-      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(
-            diningHalls: diningHall,
-          ));
+      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall));
     } else if (index == 2) {
       context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
     }
