@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
 
@@ -35,6 +36,7 @@ class _FoodPageState extends State<FoodPage> {
   void initState() {
     super.initState();
     isFavorite = widget.favoriteFoods.any((f) => f.id == widget.food.id);
+    // context.read<DiningBloc>().add()
   }
 
   void toggleFavorite() {
@@ -48,8 +50,13 @@ class _FoodPageState extends State<FoodPage> {
       context.read<DiningBloc>().add(DeleteFavoriteFoodEvent(foodId: widget.food.id));
     }
 
-    // Optionally refresh global favorites state
     context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
+  }
+
+  String formatDate(String rawDate) {
+    final DateTime date = DateTime.parse(rawDate);
+    final DateFormat formatter = DateFormat('EEEE, MMMM d');
+    return formatter.format(date);
   }
 
   @override
@@ -81,20 +88,76 @@ class _FoodPageState extends State<FoodPage> {
         children: [
           Row(
             children: [
-              Text(
-                food.name,
-                style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                height: 30,
-                width: 2,
-                color: Colors.grey[200],
-                margin: const EdgeInsets.symmetric(horizontal: 12),
+              Flexible(
+                child: Text(
+                  food.name,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 3,
+                ),
               ),
             ],
           ),
           Divider(color: Colors.grey[400]),
           const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Found At: ",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Flexible(
+                child: Text(
+                  food.sections.join(", "),
+                  style: const TextStyle(fontSize: 16),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 3,
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Served During: ",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Flexible(
+                child: Text(
+                  food.mealTypes.join(", "),
+                  style: const TextStyle(fontSize: 16),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 3,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Last Served: ",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Flexible(
+                child: Text(
+                  formatDate(food.dates.last),
+                  style: const TextStyle(fontSize: 16),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 3,
+                ),
+              ),
+            ],
+          ),
+
           // Row(
           //   crossAxisAlignment: CrossAxisAlignment.start,
           //   children: [

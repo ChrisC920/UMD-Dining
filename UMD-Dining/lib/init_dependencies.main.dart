@@ -120,21 +120,6 @@ void _initDining() {
     )
     // Usecases
     ..registerFactory(
-      () => GetAllFoods(
-        serviceLocator(),
-      ),
-    )
-    ..registerFactory(
-      () => GetFood(
-        serviceLocator(),
-      ),
-    )
-    ..registerFactory(
-      () => GetFoodQuery(
-        serviceLocator(),
-      ),
-    )
-    ..registerFactory(
       () => GetFoodDetails(
         serviceLocator(),
       ),
@@ -163,9 +148,6 @@ void _initDining() {
     // Bloc
     ..registerLazySingleton(
       () => DiningBloc(
-        getAllFoods: serviceLocator(),
-        getFood: serviceLocator(),
-        getFoodQuery: serviceLocator(),
         getFoodDetails: serviceLocator(),
         getFoodsByFilters: serviceLocator(),
         addFavoriteFood: serviceLocator(),
