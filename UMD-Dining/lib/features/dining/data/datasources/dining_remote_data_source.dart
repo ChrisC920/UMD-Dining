@@ -333,8 +333,6 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
         'user_id': userId,
         'food_id': foodId,
       });
-
-      print("✅ Successfully deleted favorite: $foodId for user: $userId");
     } on ServerException catch (e) {
       throw ServerException(e.message);
     } catch (e) {

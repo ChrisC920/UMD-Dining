@@ -110,11 +110,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
         child: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
           if (state is AuthFailure) {
           } else if (state is AuthSuccess) {
-            // Navigator.pushAndRemoveUntil(
-            //   context,
-            //   StartPage.route(),
-            //   (route) => false,
-            // );
+            Navigator.pushAndRemoveUntil(
+              context,
+              StartPage.route(),
+              (route) => false,
+            );
           }
         }, builder: (context, state) {
           if (state is AuthLoading) {
@@ -124,7 +124,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           }
           return Column(
             children: [
-              const SizedBox(height: 60), // Adjust for safe area
+              const SizedBox(height: 60),
 
               // Progress Bar with Back Arrow and Page Counter
               Padding(

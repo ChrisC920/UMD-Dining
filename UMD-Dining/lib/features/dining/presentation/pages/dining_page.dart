@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -217,7 +215,7 @@ class _DiningPageState extends State<DiningPage> {
         }
         if (state is FoodGetFoodsByFiltersSuccess) {
           setState(() {
-            items = state.foods; // Update list when data is fetched
+            items = state.foods;
             allItems = List.from(state.foods);
             _filterItems();
           });
@@ -225,7 +223,7 @@ class _DiningPageState extends State<DiningPage> {
       },
       builder: (context, state) {
         if (state is DiningLoading && items.isEmpty) {
-          return const Expanded(child: Center(child: CircularProgressIndicator())); // Show loading only when empty
+          return const Expanded(child: Center(child: CircularProgressIndicator()));
         }
 
         if (items.isEmpty) {
@@ -269,14 +267,12 @@ class _DiningPageState extends State<DiningPage> {
         onPressed: () {},
       ),
       trailing: [
-        // Gray vertical divider
         Container(
           height: 24,
           width: 1,
           color: Colors.grey[400],
           margin: const EdgeInsets.symmetric(horizontal: 4),
         ),
-        // Icon button
         IconButton(
           icon: const Icon(Icons.tune),
           onPressed: () {
@@ -301,7 +297,7 @@ class _DiningPageState extends State<DiningPage> {
                     });
                     _filterItems();
                   },
-                ); // Your custom filter content
+                );
               },
             );
           },
@@ -341,13 +337,13 @@ class _DiningPageState extends State<DiningPage> {
     return NavigationBar(
       labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
       onDestinationSelected: updatePage,
-      indicatorColor: Colors.transparent, // Transparent background
+      indicatorColor: Colors.transparent,
       indicatorShape: const CircleBorder(),
       selectedIndex: currentPageIndex,
       destinations: [
         NavigationDestination(
-          icon: const Icon(Icons.home, size: 28, color: Colors.grey), // Unselected
-          selectedIcon: Icon(Icons.home, size: 32, color: Colors.red[200]), // Selected icon color
+          icon: const Icon(Icons.home, size: 28, color: Colors.grey),
+          selectedIcon: Icon(Icons.home, size: 32, color: Colors.red[200]),
           label: 'Home',
         ),
         NavigationDestination(
