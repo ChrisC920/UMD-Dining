@@ -71,17 +71,17 @@ class _FilterCardState extends State<FilterCard> {
           children: [
             _cardHeader(context),
             const Divider(height: 30, thickness: 1),
-            FilterCardTextLabel(text: "Meal"),
+            const FilterCardTextLabel(text: "Meal"),
             const SizedBox(height: 8),
             _mealTypeOptions(),
             const Divider(height: 30, thickness: 1),
-            FilterCardTextLabel(text: "Dietary Preferences"),
+            const FilterCardTextLabel(text: "Dietary Preferences"),
             _dietaryPreferencesOptions(context),
             const Divider(height: 30, thickness: 1),
-            FilterCardTextLabel(text: "Exclude items containing..."),
+            const FilterCardTextLabel(text: "Exclude items containing..."),
             _allergenOptions(context),
             const Divider(height: 30, thickness: 1),
-            FilterCardTextLabel(text: "Filter by Date"),
+            const FilterCardTextLabel(text: "Filter by Date"),
             _dateOptions(context),
             const Divider(height: 30, thickness: 1),
             Row(
@@ -171,7 +171,7 @@ class _FilterCardState extends State<FilterCard> {
       spacing: 8,
       children: allergens.map((allergen) {
         return SizedBox(
-          width: MediaQuery.of(context).size.width / 2 - 32, // half width minus padding
+          width: MediaQuery.of(context).size.width / 2 - 32,
           child: CheckboxListTile(
             title: Text(allergen, style: Theme.of(context).textTheme.titleMedium),
             value: selectedAllergens.contains(allergen),
@@ -200,7 +200,7 @@ class _FilterCardState extends State<FilterCard> {
       spacing: 8,
       children: dietaryPreferences.map((dietaryPreference) {
         return SizedBox(
-          width: MediaQuery.of(context).size.width / 2 - 32, // half width minus padding
+          width: MediaQuery.of(context).size.width / 2 - 32,
           child: CheckboxListTile(
             title: Text(dietaryPreference, style: Theme.of(context).textTheme.titleMedium),
             value: selectedDietaryPreferences.contains(dietaryPreference),
@@ -241,7 +241,7 @@ class _FilterCardState extends State<FilterCard> {
             ),
           ),
           selected: selected,
-          selectedColor: Colors.white, // Color when selected
+          selectedColor: Colors.white,
           onSelected: (_) {
             setState(() {
               selected ? selectedMealTypes.remove(meal) : selectedMealTypes.add(meal);
@@ -289,8 +289,8 @@ class _FilterCardState extends State<FilterCard> {
 }
 
 class FilterCardTextLabel extends StatelessWidget {
-  String text;
-  FilterCardTextLabel({
+  final String text;
+  const FilterCardTextLabel({
     super.key,
     required this.text,
   });
