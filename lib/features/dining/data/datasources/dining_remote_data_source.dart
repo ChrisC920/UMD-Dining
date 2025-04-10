@@ -329,7 +329,7 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
       final userId = supabaseClient.auth.currentUser?.id;
       if (userId == null) throw Exception("No user logged in");
 
-      final response = await supabaseClient.from('user_favorites').delete().match({
+      await supabaseClient.from('user_favorites').delete().match({
         'user_id': userId,
         'food_id': foodId,
       });

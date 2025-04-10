@@ -18,6 +18,21 @@ class Constants {
     'food',
   ];
 
+  static const List<String> allergens = [
+    'Contains Sesame',
+    'Contains Fish',
+    'Contains Nuts',
+    'Contains Shellfish',
+    'Contains Dairy',
+    'Contains Eggs',
+    'Contains Soy',
+    'Contains Gluten',
+    'Vegetarian',
+    'Vegan',
+    'Halal',
+    'Smart Choice',
+  ];
+
   static const List<MovingCircle> movingCircles = [
     MovingCircle(
       color: Color.fromARGB(112, 244, 67, 54),

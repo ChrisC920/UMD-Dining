@@ -53,20 +53,35 @@ class _FoodPageState extends State<FoodPage> {
     final food = widget.food;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("UMD Dining"),
+        title: const Text(
+          "UMD Dining",
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Helvetica',
+          ),
+        ),
+        elevation: 1.0,
         actions: [
           IconButton(
-            icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              size: 24,
+            ),
             onPressed: toggleFavorite,
           ),
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(16),
         children: [
-          Text(food.name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          NutritionText(text: 'Dining Halls: ${food.diningHalls.join(", ")}'),
+          Text(food.name, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 0),
+          Text(food.diningHalls.join(", "),
+              style: const TextStyle(
+                color: Color.fromARGB(255, 178, 178, 178),
+                fontSize: 16,
+              )),
           NutritionText(text: 'Sections: ${food.sections.join(", ")}'),
           NutritionText(text: 'Meal Types: ${food.mealTypes.join(", ")}'),
           const SizedBox(height: 20),
@@ -98,14 +113,11 @@ class NutritionText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-        ),
+    return Text(
+      text,
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 20,
       ),
     );
   }

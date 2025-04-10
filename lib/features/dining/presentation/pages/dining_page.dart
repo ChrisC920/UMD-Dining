@@ -1,11 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:umd_dining_refactor/config/themes/app_pallete.dart';
-import 'package:umd_dining_refactor/core/constants/constants.dart';
 import 'package:umd_dining_refactor/core/utils/show_snackbar.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/pages/food_page.dart';
+import 'package:umd_dining_refactor/features/dining/presentation/widgets/filter_card.dart';
 
 class DiningPage extends StatefulWidget {
   static route(List<String>? diningHall) => MaterialPageRoute(
@@ -28,8 +29,10 @@ class _DiningPageState extends State<DiningPage> {
   List<Food> allItems = [];
   List<Food> items = [];
   List<Food> searchHistory = [];
-  List<String> selectedMealTypes = [];
   List<Food> favoriteFoods = [];
+  Set<String> selectedMealTypes = <String>{};
+  Set<String> selectedAllergens = <String>{};
+  Set<String> selectedDietaryPreferences = <String>{};
   int currentPageIndex = 1;
 
   @override
@@ -56,15 +59,6 @@ class _DiningPageState extends State<DiningPage> {
   }
 
   void search(String query, List<String> mealTypes) {
-    // setState(() {
-    //   if (query.isEmpty) {
-    //     items = allItems;
-    //   }
-    //   items = allItems
-    //       .where((e) => e.name.toLowerCase().contains(query.toLowerCase()))
-    //       .where((e) => mealTypes.every((type) => e.mealTypes.contains(type)))
-    //       .toList();
-    // });
     final query = _searchController.text.toLowerCase();
     setState(() {
       if (query.isEmpty) {
@@ -76,19 +70,80 @@ class _DiningPageState extends State<DiningPage> {
     });
   }
 
+  Timer? _debounce;
+
   void _filterItems() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      if (query.isEmpty) {
-        items = List.from(allItems); // Show all items when search is empty
-      } else {
-        items = allItems.where((food) => food.name.toLowerCase().contains(query)).toList();
-      }
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      final query = _searchController.text.toLowerCase();
+      setState(() {
+        items = allItems
+            .where((food) =>
+                food.name.toLowerCase().contains(query) &&
+                selectedMealTypes.every((type) => food.mealTypes.contains(type)) &&
+                selectedDietaryPreferences.every((pref) => convertAllergenList(food.allergens).contains(pref)) &&
+                selectedAllergens.every((allergen) => !convertAllergenList(food.allergens).contains(allergen)))
+            .toList();
+      });
     });
   }
 
-  void queryListener() {
-    search(_searchController.text, selectedMealTypes);
+  // void _filterItems() {
+  //   final query = _searchController.text.toLowerCase();
+
+  //   setState(() {
+  //     items = allItems.where((food) {
+  //       print(food.allergens);
+  //       // ✅ Text search match
+  //       final matchesQuery = food.name.toLowerCase().contains(query);
+
+  //       // ✅ Meal types: All selected meal types must be in food's mealTypes
+  //       final matchesMealTypes = selectedMealTypes.every((type) => food.mealTypes.contains(type));
+
+  //       // ✅ Allergens: food must NOT contain any selected allergen
+  //       final excludesAllergens = selectedAllergens.every((allergen) => !convertAllergenList(food.allergens).contains(allergen));
+
+  //       // ✅ Dietary preferences: each selected preference must match
+  //       final matchesDietPrefs = selectedDietaryPreferences.every((pref) => convertAllergenList(food.allergens).contains(pref));
+
+  //       return matchesQuery && matchesMealTypes && excludesAllergens && matchesDietPrefs;
+  //     }).toList();
+  //   });
+  // }
+
+  List<String> convertAllergenList(List<String> allergens) {
+    return allergens.map((e) => convertAllergen(e)).toList();
+  }
+
+  String convertAllergen(String allergen) {
+    switch (allergen) {
+      case 'Contains sesame':
+        return 'Sesame';
+      case 'vegan':
+        return 'Vegan';
+      case 'Contains fish':
+        return 'Fish';
+      case 'Contains nuts':
+        return 'Nuts';
+      case 'Contains Shellfish':
+        return 'Shellfish';
+      case 'Contains dairy':
+        return 'Dairy';
+      case 'smartchoice':
+        return 'Smart Choice';
+      case 'HalalFriendly':
+        return 'Halal';
+      case 'Contains egg':
+        return 'Eggs';
+      case 'Contains soy':
+        return 'Soy';
+      case 'Contains gluten':
+        return 'Gluten';
+      case 'vegetarian':
+        return 'Vegetarian';
+      default:
+        return 'Unknown';
+    }
   }
 
   void updatePage(int index) {
@@ -137,8 +192,10 @@ class _DiningPageState extends State<DiningPage> {
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
+            fontFamily: 'Helvetica',
           ),
         ),
+        elevation: 1.0,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
@@ -164,7 +221,7 @@ class _DiningPageState extends State<DiningPage> {
           ),
           Column(
             children: [
-              _mealTypeOptions(),
+              const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: SearchBar(
@@ -174,6 +231,43 @@ class _DiningPageState extends State<DiningPage> {
                     icon: const Icon(Icons.search),
                     onPressed: () {},
                   ),
+                  trailing: [
+                    // Gray vertical divider
+                    Container(
+                      height: 24,
+                      width: 1,
+                      color: Colors.grey[400],
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                    ),
+                    // Icon button
+                    IconButton(
+                      icon: const Icon(Icons.tune),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                          ),
+                          isScrollControlled: true,
+                          builder: (context) {
+                            return FilterCard(
+                              selectedAllergens: selectedAllergens,
+                              selectedMealTypes: selectedMealTypes,
+                              selectedDietaryPreferences: selectedDietaryPreferences,
+                              onApply: (allergens, mealTypes, dietaryPreferences) {
+                                setState(() {
+                                  selectedAllergens = allergens;
+                                  selectedMealTypes = mealTypes;
+                                  selectedDietaryPreferences = dietaryPreferences;
+                                });
+                                _filterItems();
+                              },
+                            ); // Your custom filter content
+                          },
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
               BlocConsumer<DiningBloc, DiningState>(
@@ -202,7 +296,10 @@ class _DiningPageState extends State<DiningPage> {
                       itemBuilder: (context, index) {
                         final food = items[index];
                         return ListTile(
-                          title: Text(food.name),
+                          title: Text(
+                            food.name,
+                            style: const TextStyle(fontFamily: 'Helvetica'),
+                          ),
                           onTap: () {
                             context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
 
@@ -225,7 +322,6 @@ class _DiningPageState extends State<DiningPage> {
                 listener: (context, state) {
                   if (state is FavoriteFoodsFailure) {
                     showSnackBar(context, state.error);
-                    print(state.error);
                   }
                   if (state is FetchFavoriteFoodsSuccess) {
                     setState(() {
@@ -263,45 +359,6 @@ class _DiningPageState extends State<DiningPage> {
             ],
           ),
         ][currentPageIndex],
-      ),
-    );
-  }
-
-  SingleChildScrollView _mealTypeOptions() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: Constants.mealTypes
-            .map(
-              (e) => Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: GestureDetector(
-                  onTap: () {
-                    if (selectedMealTypes.contains(e)) {
-                      selectedMealTypes.remove(e);
-                    } else {
-                      selectedMealTypes.add(e);
-                    }
-                    search(_searchController.text, selectedMealTypes);
-                    setState(() {});
-                  },
-                  child: Chip(
-                    label: Text(e),
-                    color: selectedMealTypes.contains(e)
-                        ? const WidgetStatePropertyAll(
-                            AppPallete.gradient1,
-                          )
-                        : null,
-                    side: selectedMealTypes.contains(e)
-                        ? null
-                        : const BorderSide(
-                            color: AppPallete.borderColor,
-                          ),
-                  ),
-                ),
-              ),
-            )
-            .toList(),
       ),
     );
   }
