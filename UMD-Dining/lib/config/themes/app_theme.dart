@@ -14,18 +14,23 @@ class AppTheme {
     appBarTheme: const AppBarTheme(
       backgroundColor: AppPallete.backgroundColor,
     ),
-    chipTheme: const ChipThemeData(
-      color: WidgetStatePropertyAll(
-        AppPallete.backgroundColor,
-      ),
-      side: BorderSide.none,
-    ),
+    // chipTheme: const ChipThemeData(
+    //   color: WidgetStatePropertyAll(
+    //     AppPallete.backgroundColor,
+    //   ),
+    //   side: BorderSide.none,
+    // ),
     inputDecorationTheme: InputDecorationTheme(
       contentPadding: const EdgeInsets.all(27),
       border: _border(),
       enabledBorder: _border(),
       focusedBorder: _border(AppPallete.gradient2),
       errorBorder: _border(AppPallete.errorColor),
+    ),
+    textTheme: const TextTheme(
+      bodyLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w400, fontFamily: 'Helvetica'),
+      bodyMedium: TextStyle(fontSize: 16, fontFamily: 'Helvetica'),
+      titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Helvetica'),
     ),
   );
 }
