@@ -4,20 +4,23 @@ import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
 
 class FoodPage extends StatefulWidget {
-  static route(Food food, List<Food> favoriteFoods) => MaterialPageRoute(
+  static route(Food food, List<Food> favoriteFoods, List<String> currDiningHall) => MaterialPageRoute(
         builder: (context) => FoodPage(
           food: food,
           favoriteFoods: favoriteFoods,
+          currDiningHall: currDiningHall,
         ),
       );
 
   final Food food;
-  final List<Food> favoriteFoods; // 👈 New
+  final List<Food> favoriteFoods;
+  final List<String> currDiningHall;
 
   const FoodPage({
     super.key,
     required this.food,
     required this.favoriteFoods,
+    required this.currDiningHall,
   });
 
   @override
@@ -25,6 +28,7 @@ class FoodPage extends StatefulWidget {
 }
 
 class _FoodPageState extends State<FoodPage> {
+  List<String> get currDiningHall => widget.currDiningHall;
   late bool isFavorite;
 
   @override
@@ -75,29 +79,89 @@ class _FoodPageState extends State<FoodPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(food.name, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 0),
-          Text(food.diningHalls.join(", "),
-              style: const TextStyle(
-                color: Color.fromARGB(255, 178, 178, 178),
-                fontSize: 16,
-              )),
-          NutritionText(text: 'Sections: ${food.sections.join(", ")}'),
-          NutritionText(text: 'Meal Types: ${food.mealTypes.join(", ")}'),
-          const SizedBox(height: 20),
-          const Text('Nutrition', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-          NutritionText(text: 'Calories: ${food.caloriesPerServing}'),
-          NutritionText(text: 'Serving size: ${food.servingSize}'),
-          NutritionText(text: 'Protein: ${food.protein}'),
-          NutritionText(text: 'Carbs: ${food.totalCarbohydrates}'),
-          NutritionText(text: 'Fats: ${food.totalFat}'),
-          NutritionText(text: 'Cholesterol: ${food.cholesterol}'),
-          NutritionText(text: 'Sodium: ${food.sodium}'),
-          NutritionText(text: 'Fiber: ${food.dietaryFiber}'),
-          NutritionText(text: 'Sugars: ${food.totalSugars}'),
-          NutritionText(text: 'Added Sugars: ${food.addedSugars}'),
-          NutritionText(text: 'Allergens: ${food.allergens.join(", ")}'),
-          NutritionText(text: 'Dates: ${food.dates.join(", ")}'),
+          Row(
+            children: [
+              Text(
+                food.name,
+                style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              ),
+              Container(
+                height: 30,
+                width: 2,
+                color: Colors.grey[200],
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+            ],
+          ),
+          Divider(color: Colors.grey[400]),
+          const SizedBox(height: 8),
+          // Row(
+          //   crossAxisAlignment: CrossAxisAlignment.start,
+          //   children: [
+          //     const Text(
+          //       "Dining halls: ",
+          //       style: TextStyle(
+          //         fontSize: 20,
+          //         fontWeight: FontWeight.bold,
+          //       ),
+          //     ),
+          //     Flexible(
+          //       child: Text(
+          //         food.diningHalls.join(", "),
+          //         style: const TextStyle(fontSize: 20),
+          //         softWrap: true,
+          //         overflow: TextOverflow.visible,
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   children: [
+          //     const Text(
+          //       "Sections:",
+          //       style: TextStyle(
+          //         fontSize: 20,
+          //         fontWeight: FontWeight.bold,
+          //       ),
+          //     ),
+          //     Text(
+          //       food.sections.join(", "),
+          //       style: const TextStyle(
+          //         fontSize: 20,
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          // RichText(
+          //   text: TextSpan(
+          //     style: const TextStyle(fontFamily: 'Helvetica', fontSize: 20),
+
+          //     children: [
+          //       const TextSpan(text: "Dining halls: "),
+          //       TextSpan(
+          //         text: food.diningHalls.join(", "),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+
+          // NutritionText(text: 'Sections: ${food.sections.join(", ")}'),
+          // NutritionText(text: 'Meal Types: ${food.mealTypes.join(", ")}'),
+          // const SizedBox(height: 20),
+          // const Text('Nutrition', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+          // NutritionText(text: 'Calories: ${food.caloriesPerServing}'),
+          // NutritionText(text: 'Serving size: ${food.servingSize}'),
+          // NutritionText(text: 'Protein: ${food.protein}'),
+          // NutritionText(text: 'Carbs: ${food.totalCarbohydrates}'),
+          // NutritionText(text: 'Fats: ${food.totalFat}'),
+          // NutritionText(text: 'Cholesterol: ${food.cholesterol}'),
+          // NutritionText(text: 'Sodium: ${food.sodium}'),
+          // NutritionText(text: 'Fiber: ${food.dietaryFiber}'),
+          // NutritionText(text: 'Sugars: ${food.totalSugars}'),
+          // NutritionText(text: 'Added Sugars: ${food.addedSugars}'),
+          // NutritionText(text: 'Allergens: ${food.allergens.join(", ")}'),
+          // NutritionText(text: 'Dates: ${food.dates.join(", ")}'),
         ],
       ),
     );
