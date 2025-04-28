@@ -99,33 +99,33 @@ class StartPage extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const DiningPage(diningHall: [])),
-                ),
-              },
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Opacity(
-                    opacity: 0.5,
-                    child: Image.asset(
-                      'assets/images/random_food.jpg',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const Center(
-                    child: Text(
-                      'Browse',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Expanded(
+          //   child: GestureDetector(
+          //     onTap: () => {
+          //       Navigator.push(
+          //         context,
+          //         MaterialPageRoute(builder: (context) => const DiningPage(diningHall: [])),
+          //       ),
+          //     },
+          //     child: Stack(
+          //       fit: StackFit.expand,
+          //       children: [
+          //         Opacity(
+          //           opacity: 0.5,
+          //           child: Image.asset(
+          //             'assets/images/random_food.jpg',
+          //             fit: BoxFit.cover,
+          //           ),
+          //         ),
+          //         const Center(
+          //           child: Text(
+          //             'Browse',
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
