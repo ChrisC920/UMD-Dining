@@ -114,7 +114,7 @@ class _FilterCardState extends State<FilterCard> {
           selectedAllergens.clear();
           selectedMealTypes.clear();
           selectedDietaryPreferences.clear();
-          selectedDate = null;
+          selectedDate = DateTime.now();
           widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
         });
       },
@@ -151,15 +151,6 @@ class _FilterCardState extends State<FilterCard> {
               },
               child: const Text("Choose Date", style: TextStyle(fontSize: 16)),
             ),
-            if (selectedDate != null)
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    selectedDate = null;
-                  });
-                },
-                child: const Text("Clear", style: TextStyle(fontSize: 16)),
-              ),
           ],
         ),
       ],

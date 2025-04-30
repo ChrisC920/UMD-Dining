@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:umd_dining_refactor/core/usecases/usecase.dart';
-import 'package:umd_dining_refactor/features/dining/domain/entities/dining.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/add_favorite_food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/delete_favorite_food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/fetch_favorite_foods.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food_details.dart';
-import 'package:umd_dining_refactor/features/dining/domain/usecases/get_foods_by_query.dart';
+import 'package:umd_dining_refactor/features/dining/domain/usecases/get_foods_by_filters.dart';
 part 'dining_event.dart';
 part 'dining_state.dart';
 
@@ -88,7 +87,7 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
     emit(DiningLoading());
 
     final res = await _getFoodsByFilters(GetFoodsByFiltersParams(
-      dates: event.dates,
+      date: event.date,
       diningHalls: event.diningHalls,
       mealTypes: event.mealTypes,
       sections: event.sections,
@@ -109,8 +108,7 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
     FoodFetchFoodDetails event,
     Emitter<DiningState> emit,
   ) async {
-    final res = await _getFoodDetails(GetFoodDetailsParams(foodId: event.foodId));
-
+    final res = await _getFoodDetails(GetFoodDetailsParams(id: event.id, date: event.date, diningHall: event.diningHall));
     res.fold(
       (l) => emit(DiningFailure(l.message)),
       (r) => emit(FoodGetFoodSuccess(r)),

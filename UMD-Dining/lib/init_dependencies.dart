@@ -24,7 +24,7 @@ import 'package:umd_dining_refactor/features/dining/domain/usecases/add_favorite
 import 'package:umd_dining_refactor/features/dining/domain/usecases/delete_favorite_food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/fetch_favorite_foods.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/get_food_details.dart';
-import 'package:umd_dining_refactor/features/dining/domain/usecases/get_foods_by_query.dart';
+import 'package:umd_dining_refactor/features/dining/domain/usecases/get_foods_by_filters.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
 
 import 'package:get_it/get_it.dart';

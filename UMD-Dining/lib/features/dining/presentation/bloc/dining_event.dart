@@ -7,23 +7,27 @@ final class FoodFetchFoodsByFilters extends DiningEvent {
   final List<String>? mealTypes;
   final List<String>? diningHalls;
   final List<String>? sections;
-  final List<String>? dates;
+  final DateTime? date;
   final List<String>? allergens;
 
   FoodFetchFoodsByFilters({
     this.mealTypes,
     this.diningHalls,
     this.sections,
-    this.dates,
+    this.date,
     this.allergens,
   });
 }
 
 final class FoodFetchFoodDetails extends DiningEvent {
-  final int foodId;
+  final int id;
+  final String? diningHall;
+  final DateTime? date;
 
   FoodFetchFoodDetails({
-    required this.foodId,
+    required this.id,
+    this.diningHall,
+    this.date,
   });
 }
 

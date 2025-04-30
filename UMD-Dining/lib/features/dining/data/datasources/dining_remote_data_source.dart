@@ -1,12 +1,16 @@
+import 'package:intl/intl.dart';
 import 'package:umd_dining_refactor/core/errors/exceptions.dart';
-import 'package:umd_dining_refactor/features/dining/data/models/dining_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 
 abstract interface class DiningRemoteDataSource {
-  Future<Food> getFoodById({required int id});
+  Future<List<Food>> getFoodById({
+    required int id,
+    String? diningHall,
+    DateTime? date,
+  });
   Future<List<Food>> getFoodsByFilters({
-    List<String>? dates, // List of dates (YYYY-MM-DD) to query by
+    DateTime? date, // List of dates (YYYY-MM-DD) to query by
     List<String>? diningHalls, // List of dining hall names
     List<String>? mealTypes, // List of meal type names
     List<String>? sections,
@@ -23,35 +27,84 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
 
   @override
   Future<List<Food>> getFoodsByFilters({
-    List<String>? dates, // List of dates (YYYY-MM-DD) to query by
+    DateTime? date, // List of dates (YYYY-MM-DD) to query by
     List<String>? diningHalls, // List of dining hall names
     List<String>? mealTypes, // List of meal type names
     List<String>? sections, // List of section names
     List<String>? allergens,
   }) async {
     try {
-      var query = supabaseClient.from('food_relations').select('''
-  food_id,
-  foods!inner (
-    id, name, link, serving_size, servings_per_container, calories_per_serving, total_fat, saturated_fat, trans_fat,
-    total_carbohydrates, dietary_fiber, total_sugars, added_sugars, cholesterol, sodium, protein,
-    food_allergens!left (allergens (id, name)),
-    food_dining_halls!left (dining_halls (id, name)),
-    food_meal_types!left (meal_types (id, name)),
-    food_sections!left (sections (id, name)),
-    food_dates!left (dates (id, date))
-  )
-''');
+      PostgrestFilterBuilder<PostgrestList> query;
 
-      // Filter by multiple dates
-      if (dates != null && dates.isNotEmpty) {
-        final datesRes = await supabaseClient.from('dates').select('id, date').inFilter('date', dates);
-        final ids = datesRes.map((e) => e['id']).toList();
-        query = query.inFilter('date_id', ids);
+      if (date != null) {
+        final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+
+        final dateRes = await supabaseClient.from('dates').select('id').eq('date', formattedDate).maybeSingle(); // Returns null if not found
+
+        if (dateRes == null) {
+          throw Exception("Date not found in 'dates' table");
+        }
+
+        final dateId = dateRes['id'];
+        query = supabaseClient.from('food_relations').select(r'''
+      food_id,
+      food:foods!inner(
+        name,
+        link,
+        serving_size,
+        servings_per_container,
+        calories_per_serving,
+        total_fat,
+        saturated_fat,
+        trans_fat,
+        cholesterol,
+        sodium,
+        total_carbohydrates,
+        dietary_fiber,
+        total_sugars,
+        added_sugars,
+        protein,
+        food_allergens!left (allergens (name))
+      ),
+      dining_hall:dining_halls!inner(name),
+      meal_type:meal_types!inner(name),
+      section:sections!inner(name),
+      date:dates!inner(date)
+    ''').eq('date_id', dateId);
+      } else {
+        query = supabaseClient.from('food_relations').select('''
+  food_id,
+      food:foods!inner(
+        name,
+        link,
+        serving_size,
+        servings_per_container,
+        calories_per_serving,
+        total_fat,
+        saturated_fat,
+        trans_fat,
+        cholesterol,
+        sodium,
+        total_carbohydrates,
+        dietary_fiber,
+        total_sugars,
+        added_sugars,
+        protein,
+        food_allergens!left (allergens (name))
+      ),
+      dining_hall:dining_halls!inner(name),
+      meal_type:meal_types!inner(name),
+      section:sections!inner(name),
+      date:dates!inner(date)
+''');
       }
 
       // Filter by dining hall names
-      if (diningHalls != null && diningHalls.isNotEmpty) {
+      // if (diningHalls != null && diningHalls.length == 1) {
+      //   final diningHallRes = await supabaseClient.from('dining_halls').select('*').eq('name', diningHalls.first).single();
+      //   query = query.eq('dining_hall_id', diningHallRes['id']);
+      //   print("SINGLE DINING HALL FILTER");
+      /*} else */ if (diningHalls != null && diningHalls.isNotEmpty) {
         final diningHallsRes = await supabaseClient.from('dining_halls').select('id, name').inFilter('name', diningHalls);
         final ids = diningHallsRes.map((e) => e['id']).toList();
         query = query.inFilter('dining_hall_id', ids);
@@ -78,10 +131,11 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
       }
 
       final response = await query;
+
       final foods = response
           .map((food) {
             try {
-              return Food.fromJson(food);
+              return Food.fromJsonAlt(food);
             } catch (e) {
               return null;
             }
@@ -99,8 +153,12 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
 // Remove duplicates by name while keeping the first occurrence
       final uniqueFoods = foods
           .fold<Map<String, Food>>({}, (map, food) {
-            // Use name + diningHall combo as a unique key
-            final key = '${food.name}|${food.caloriesPerServing}';
+            // Sort dates to make sure the key is consistent
+            final sortedDates = [...food.dates]..sort();
+            final datesKey = sortedDates.join(',');
+
+            final key = '${food.name}|${food.caloriesPerServing}|$datesKey';
+            // print("KEY $key");
 
             if (map.containsKey(key)) {
               final existing = map[key]!;
@@ -127,6 +185,7 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
                 sections: {...existing.sections, ...food.sections}.toSet().toList(),
                 allergens: {...existing.allergens, ...food.allergens}.toSet().toList(),
                 dates: {...existing.dates, ...food.dates}.toSet().toList(),
+                // dates: existing.dates,
               );
             } else {
               map[key] = food;
@@ -137,6 +196,7 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
           .values
           .toList()
         ..sort((a, b) => a.name.compareTo(b.name));
+
       return uniqueFoods;
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
@@ -146,19 +206,85 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
   }
 
   @override
-  Future<Food> getFoodById({required int id}) async {
-    final response = await supabaseClient.from('foods').select('''
-            id, name, link, serving_size, servings_per_container,
-            calories_per_serving, total_fat, saturated_fat, trans_fat,
-            total_carbohydrates, dietary_fiber, total_sugars, added_sugars,
-            cholesterol, sodium, protein,
-            food_allergens(allergens(id, name)),
-            food_meal_types(meal_types(id, name)),
-            food_dining_halls(dining_halls(id, name)),
-            food_sections(sections(id, name))
-          ''').eq('id', id).single();
+  Future<List<Food>> getFoodById({required int id, String? diningHall, DateTime? date}) async {
+    try {
+      PostgrestFilterBuilder<PostgrestList> query;
+      if (date != null) {
+        final formattedDate = DateFormat('yyyy-MM-dd').format(date);
 
-    return Food.fromJson(response);
+        final dateRes = await supabaseClient.from('dates').select('id').eq('date', formattedDate).maybeSingle(); // Returns null if not found
+
+        if (dateRes == null) {
+          throw Exception("Date not found in 'dates' table");
+        }
+
+        final dateId = dateRes['id'];
+        query = supabaseClient.from('food_relations').select(r'''
+      food_id,
+      food:foods!inner(
+        name,
+        link,
+        serving_size,
+        servings_per_container,
+        calories_per_serving,
+        total_fat,
+        saturated_fat,
+        trans_fat,
+        cholesterol,
+        sodium,
+        total_carbohydrates,
+        dietary_fiber,
+        total_sugars,
+        added_sugars,
+        protein,
+        food_allergens!left (allergens (name))
+      ),
+      dining_hall:dining_halls!inner(name),
+      meal_type:meal_types!inner(name),
+      section:sections!inner(name),
+      date:dates!inner(date)
+    ''').eq('food_id', id).eq('date_id', dateId);
+      } else {
+        query = supabaseClient.from('food_relations').select('''
+  food_id,
+  foods!inner (
+    id, name, link, serving_size, servings_per_container, calories_per_serving, total_fat, saturated_fat, trans_fat,
+    total_carbohydrates, dietary_fiber, total_sugars, added_sugars, cholesterol, sodium, protein,
+    food_allergens!left (allergens (id, name)),
+    food_dining_halls!left (dining_halls (id, name)),
+    food_meal_types!left (meal_types (id, name)),
+    food_sections!left (sections (id, name)),
+    food_dates!left (dates (id, date))
+  )
+''').eq('food_id', id);
+      }
+
+      final response = await query;
+      final foods = response
+          .map((food) {
+            try {
+              return Food.fromJsonAlt(food);
+            } catch (e) {
+              return null;
+            }
+            // catch (e, stacktrace) {
+            //   print("Error parsing food item: $food");
+            //   print("Error details: $e");
+            //   print("Stacktrace: $stacktrace");
+            //   return null;
+            // }
+          })
+          .whereType<Food>()
+          .toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+      // print(foods);
+
+      return foods;
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
   }
 
   List<Food> mergeDuplicateFoods(List<Food> foods) {
