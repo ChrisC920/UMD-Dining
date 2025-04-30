@@ -14,7 +14,7 @@ class GetFoodsByFilters implements UseCase<List<Food>, GetFoodsByFiltersParams> 
       diningHalls: params.diningHalls,
       sections: params.sections,
       mealTypes: params.mealTypes,
-      dates: params.dates,
+      date: params.date,
       allergens: params.allergens,
     );
     return result;
@@ -22,14 +22,14 @@ class GetFoodsByFilters implements UseCase<List<Food>, GetFoodsByFiltersParams> 
 }
 
 class GetFoodsByFiltersParams {
-  final List<String>? dates;
+  final DateTime? date;
   final List<String>? diningHalls;
   final List<String>? sections;
   final List<String>? mealTypes;
   final List<String>? allergens;
 
   GetFoodsByFiltersParams({
-    this.dates,
+    this.date,
     this.diningHalls,
     this.sections,
     this.mealTypes,

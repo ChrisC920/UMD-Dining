@@ -22,7 +22,7 @@ class DiningRepositoryImpl implements DiningRepository {
     List<String>? mealTypes,
     List<String>? diningHalls,
     List<String>? sections,
-    List<String>? dates,
+    DateTime? date,
     List<String>? allergens,
   }) async {
     try {
@@ -33,7 +33,7 @@ class DiningRepositoryImpl implements DiningRepository {
         mealTypes: mealTypes,
         diningHalls: diningHalls,
         sections: sections,
-        dates: dates,
+        date: date,
         allergens: allergens,
       );
       return right(food);
@@ -43,12 +43,12 @@ class DiningRepositoryImpl implements DiningRepository {
   }
 
   @override
-  Future<Either<Failure, Food>> getFoodById({required int foodId}) async {
+  Future<Either<Failure, List<Food>>> getFoodById({required int id, String? diningHall, DateTime? date}) async {
     try {
       if (!await (connectionChecker.isConnected)) {
         return left(Failure(Constants.noConnectionErrorMessage));
       }
-      final food = await diningRemoteDataSource.getFoodById(id: foodId);
+      final food = await diningRemoteDataSource.getFoodById(id: id, diningHall: diningHall, date: date);
       return right(food);
     } on ServerException catch (e) {
       return left(Failure(e.message));

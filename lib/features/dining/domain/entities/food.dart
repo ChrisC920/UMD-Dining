@@ -64,8 +64,6 @@ class Food {
       cholesterol: (json['foods']?['cholesterol'] ?? "N/A"),
       sodium: (json['foods']?['sodium'] ?? "N/A"),
       protein: (json['foods']?['protein'] ?? "N/A"),
-
-      // ✅ Fix: Directly extract name from objects instead of using a list
       diningHalls: json['foods']?['food_dining_halls'] != null
           ? List<String>.from((json['foods']?['food_dining_halls'] as List).map((e) => e['dining_halls']['name'] ?? "Unknown"))
           : [],
@@ -81,6 +79,35 @@ class Food {
       dates: json['foods']?['food_dates'] != null ? List<String>.from((json['foods']?['food_dates'] as List).map((e) => e['dates']['date'] ?? "Unknown")) : [],
     );
     // print("look here ${parsedFood.toString()}");
+    return parsedFood;
+  }
+
+  factory Food.fromJsonAlt(Map<String, dynamic> json) {
+    final parsedFood = Food(
+      id: json['food_id'] ?? 0,
+      name: json['food']?['name'] ?? "Unknown",
+      link: json['food']?['link'] ?? "No URL Found",
+      servingSize: json['food']?['serving_size'] ?? "N/A",
+      servingsPerContainer: json['food']?['servings_per_container'] ?? "N/A",
+      caloriesPerServing: json['food']?['calories_per_serving'] ?? "N/A",
+      totalFat: (json['food']?['total_fat'] ?? "N/A"),
+      saturatedFat: (json['food']?['saturated_fat'] ?? "N/A"),
+      transFat: (json['food']?['trans_fat'] ?? "N/A"),
+      totalCarbohydrates: (json['food']?['total_carbohydrates'] ?? "N/A"),
+      dietaryFiber: (json['food']?['dietary_fiber'] ?? "N/A"),
+      totalSugars: (json['food']?['total_sugars'] ?? "N/A"),
+      addedSugars: (json['food']?['added_sugars'] ?? "N/A"),
+      cholesterol: (json['food']?['cholesterol'] ?? "N/A"),
+      sodium: (json['food']?['sodium'] ?? "N/A"),
+      protein: (json['food']?['protein'] ?? "N/A"),
+      diningHalls: [json['dining_hall']?['name']],
+      mealTypes: [json['meal_type']?['name']],
+      sections: [json['section']?['name']],
+      allergens: json['food']?['food_allergens'] != null
+          ? List<String>.from((json['food']?['food_allergens'] as List).map((e) => e['allergens']['name'] ?? "Unknown"))
+          : [],
+      dates: [(json['date']?['date']).toString()],
+    );
     return parsedFood;
   }
 

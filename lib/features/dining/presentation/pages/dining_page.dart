@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:string_similarity/string_similarity.dart';
 import 'package:umd_dining_refactor/core/utils/show_snackbar.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
@@ -58,15 +59,29 @@ class _DiningPageState extends State<DiningPage> {
 
   void _filterItems() {
     final query = _searchController.text.toLowerCase();
+    // TODO: FIX FILTER BC IT DOESN'T REALLY WORK BY DATE DUE TO MERGING
     setState(() {
-      items = allItems
-          .where((food) =>
-              food.name.toLowerCase().contains(query) &&
-              selectedMealTypes.every((type) => food.mealTypes.contains(type)) &&
-              selectedDietaryPreferences.every((pref) => convertAllergenList(food.allergens).contains(pref)) &&
-              selectedAllergens.every((allergen) => !convertAllergenList(food.allergens).contains(allergen)) &&
-              (selectedDate != null ? food.dates.contains(DateFormat('yyyy-MM-dd').format(selectedDate!)) : true))
-          .toList();
+      items = allItems.where((food) {
+        final matchesFilters = selectedMealTypes.every((type) => food.mealTypes.contains(type)) &&
+            selectedDietaryPreferences.every((pref) => convertAllergenList(food.allergens).contains(pref)) &&
+            selectedAllergens.every((allergen) => !convertAllergenList(food.allergens).contains(allergen)) &&
+            (selectedDate != null ? food.dates.contains(DateFormat('yyyy-MM-dd').format(selectedDate!)) : true);
+
+        if (query.isEmpty) {
+          return matchesFilters; // Show all filtered items if query is empty
+        }
+
+        final name = food.name.toLowerCase();
+        final similarity = StringSimilarity.compareTwoStrings(name, query);
+        final isMatch = name.contains(query) || similarity > 0.4;
+
+        return isMatch && matchesFilters;
+      }).toList();
+      items.sort((a, b) {
+        final simA = StringSimilarity.compareTwoStrings(a.name.toLowerCase(), query);
+        final simB = StringSimilarity.compareTwoStrings(b.name.toLowerCase(), query);
+        return simB.compareTo(simA); // Higher similarity first
+      });
     });
   }
 
@@ -192,7 +207,7 @@ class _DiningPageState extends State<DiningPage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    FoodPage.route(food, favoriteFoods, diningHall!),
+                    FoodPage.route(food.id, favoriteFoods, diningHall!, selectedDate, selectedMealTypes),
                   );
                 },
               );
@@ -243,7 +258,7 @@ class _DiningPageState extends State<DiningPage> {
 
                   Navigator.push(
                     context,
-                    FoodPage.route(food, favoriteFoods, diningHall!),
+                    FoodPage.route(food.id, favoriteFoods, diningHall!, selectedDate, selectedMealTypes),
                   );
                 },
               );

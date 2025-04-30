@@ -8,15 +8,23 @@ class GetFoodDetails {
 
   GetFoodDetails(this.diningRepository);
 
-  Future<Either<Failure, Food>> call(GetFoodDetailsParams params) async {
-    return await diningRepository.getFoodById(foodId: params.foodId);
+  Future<Either<Failure, List<Food>>> call(GetFoodDetailsParams params) async {
+    return await diningRepository.getFoodById(
+      id: params.id,
+      date: params.date,
+      diningHall: params.diningHall,
+    );
   }
 }
 
 class GetFoodDetailsParams {
-  final int foodId;
+  final int id;
+  final String? diningHall;
+  final DateTime? date;
 
   GetFoodDetailsParams({
-    required this.foodId,
+    required this.id,
+    this.diningHall,
+    this.date,
   });
 }

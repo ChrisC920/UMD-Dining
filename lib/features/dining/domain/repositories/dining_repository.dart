@@ -3,12 +3,16 @@ import 'package:fpdart/fpdart.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 
 abstract interface class DiningRepository {
-  Future<Either<Failure, Food>> getFoodById({required int foodId});
+  Future<Either<Failure, List<Food>>> getFoodById({
+    required int id,
+    String? diningHall,
+    DateTime? date,
+  });
   Future<Either<Failure, List<Food>>> getFoodsByFilters({
     List<String>? mealTypes,
     List<String>? diningHalls,
     List<String>? sections,
-    List<String>? dates,
+    DateTime? date,
     List<String>? allergens,
   });
   Future<Either<Failure, void>> addFavoriteFood({required int foodId});

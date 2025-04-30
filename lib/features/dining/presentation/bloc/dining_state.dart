@@ -20,8 +20,8 @@ final class DiningFailure extends DiningState {
 }
 
 final class FoodGetFoodSuccess extends DiningState {
-  final Food food;
-  FoodGetFoodSuccess(this.food);
+  final List<Food> foods;
+  FoodGetFoodSuccess(this.foods);
 }
 
 final class FoodGetFoodsByFiltersSuccess extends DiningState {
