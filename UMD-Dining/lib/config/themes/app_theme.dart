@@ -9,7 +9,7 @@ class AppTheme {
         ),
         borderRadius: BorderRadius.circular(10),
       );
-  static final darkThemeMode = ThemeData.dark().copyWith(
+  static final darkThemeMode = ThemeData.light().copyWith(
     scaffoldBackgroundColor: AppPallete.backgroundColor,
     appBarTheme: const AppBarTheme(
       backgroundColor: AppPallete.backgroundColor,
