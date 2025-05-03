@@ -63,42 +63,50 @@ class _FilterCardState extends State<FilterCard> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _cardHeader(context),
-            const Divider(height: 30, thickness: 1),
-            const FilterCardTextLabel(text: "Meal"),
-            const SizedBox(height: 8),
-            _mealTypeOptions(),
-            const Divider(height: 30, thickness: 1),
-            const FilterCardTextLabel(text: "Dietary Preferences"),
-            _dietaryPreferencesOptions(context),
-            const Divider(height: 30, thickness: 1),
-            const FilterCardTextLabel(text: "Exclude items containing..."),
-            _allergenOptions(context),
-            const Divider(height: 30, thickness: 1),
-            const FilterCardTextLabel(text: "Filter by Date"),
-            _dateOptions(context),
-            const Divider(height: 30, thickness: 1),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _clearButton(),
-                _applyButton(context),
-              ],
-            )
-          ],
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: Theme.of(context).textTheme.apply(
+              bodyColor: Colors.black,
+              displayColor: Colors.black,
+            ),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _cardHeader(context),
+              const Divider(height: 30, thickness: 1),
+              const FilterCardTextLabel(text: "Meal"),
+              const SizedBox(height: 8),
+              _mealTypeOptions(),
+              const Divider(height: 30, thickness: 1),
+              const FilterCardTextLabel(text: "Dietary Preferences"),
+              _dietaryPreferencesOptions(context),
+              const Divider(height: 30, thickness: 1),
+              const FilterCardTextLabel(text: "Exclude items containing..."),
+              _allergenOptions(context),
+              const Divider(height: 30, thickness: 1),
+              const FilterCardTextLabel(text: "Filter by Date"),
+              _dateOptions(context),
+              const Divider(height: 30, thickness: 1),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _clearButton(),
+                  _applyButton(context),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
   }
 
-  ElevatedButton _applyButton(BuildContext context) {
-    return ElevatedButton(
+  OutlinedButton _applyButton(BuildContext context) {
+    return OutlinedButton(
       onPressed: () {
         widget.onApply(selectedAllergens, selectedMealTypes, selectedDietaryPreferences, selectedDate);
         Navigator.pop(context);
@@ -149,7 +157,12 @@ class _FilterCardState extends State<FilterCard> {
                   });
                 }
               },
-              child: const Text("Choose Date", style: TextStyle(fontSize: 16)),
+              child: const Text(
+                "Choose Date",
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
             ),
           ],
         ),
@@ -226,13 +239,13 @@ class _FilterCardState extends State<FilterCard> {
           label: Text(
             meal,
             style: TextStyle(
-              color: selected ? Colors.black : Colors.white,
+              color: selected ? Colors.white : Colors.black,
               fontWeight: FontWeight.w500,
               fontSize: 16,
             ),
           ),
           selected: selected,
-          selectedColor: Colors.white,
+          selectedColor: Colors.black,
           onSelected: (_) {
             setState(() {
               selected ? selectedMealTypes.remove(meal) : selectedMealTypes.add(meal);

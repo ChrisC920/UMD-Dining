@@ -42,7 +42,8 @@ class _MainAppState extends State<MainApp> {
       showPerformanceOverlay: false,
       debugShowCheckedModeBanner: false,
       title: 'UMD Dining',
-      theme: AppTheme.darkThemeMode,
+      // theme: AppTheme.darkThemeMode,
+      theme: ThemeData.light(),
       home: BlocSelector<AppUserCubit, AppUserState, bool>(
         selector: (state) {
           return state is AppUserLoggedIn;

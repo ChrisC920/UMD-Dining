@@ -45,6 +45,32 @@ class Food {
     required this.dates,
   });
 
+  factory Food.empty() {
+    return Food(
+      id: 0,
+      name: '',
+      link: '',
+      servingSize: '',
+      servingsPerContainer: '1',
+      caloriesPerServing: '0',
+      totalFat: '0g',
+      saturatedFat: '0g',
+      transFat: '0g',
+      totalCarbohydrates: '0g',
+      dietaryFiber: '0g',
+      totalSugars: '0g',
+      addedSugars: '0g',
+      cholesterol: '0mg',
+      sodium: '0mg',
+      protein: '0g',
+      allergens: [],
+      mealTypes: [],
+      diningHalls: [],
+      sections: [],
+      dates: [],
+    );
+  }
+
   factory Food.fromJson(Map<String, dynamic> json) {
     //print("look here $json");
     final parsedFood = Food(

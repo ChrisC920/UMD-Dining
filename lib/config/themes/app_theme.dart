@@ -28,9 +28,23 @@ class AppTheme {
       errorBorder: _border(AppPallete.errorColor),
     ),
     textTheme: const TextTheme(
-      bodyLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w400, fontFamily: 'Helvetica'),
-      bodyMedium: TextStyle(fontSize: 16, fontFamily: 'Helvetica'),
-      titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Helvetica'),
+      bodyLarge: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w400,
+        fontFamily: 'Helvetica',
+        color: Colors.black,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 16,
+        fontFamily: 'Helvetica',
+        color: Colors.black,
+      ),
+      titleLarge: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        fontFamily: 'Helvetica',
+        color: Colors.black,
+      ),
     ),
   );
 }
