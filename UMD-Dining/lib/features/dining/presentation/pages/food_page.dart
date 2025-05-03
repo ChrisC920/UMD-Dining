@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:umd_dining_refactor/core/utils/show_snackbar.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
-import 'package:umd_dining_refactor/features/dining/presentation/widgets/expansion_text.dart';
 
 class FoodPage extends StatefulWidget {
   static route(
@@ -49,6 +48,7 @@ class _FoodPageState extends State<FoodPage> {
   DateTime? get date => widget.date;
   late bool isFavorite;
   List<Food> foods = [];
+  Food? displayedFood;
 
   @override
   void initState() {
@@ -109,96 +109,112 @@ class _FoodPageState extends State<FoodPage> {
 
   @override
   Widget build(BuildContext context) {
-    // final food = widget.food;
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 245, 245, 245),
-      appBar: AppBar(
-        title: const Text(
-          "UMD Dining",
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Helvetica',
-          ),
+      appBar: _appBar(),
+      body: BlocConsumer<DiningBloc, DiningState>(listener: (context, state) {
+        if (state is DiningFailure) {
+          showSnackBar(context, state.error);
+        }
+        if (state is FoodGetFoodSuccess) {
+          foods = state.foods;
+        }
+        if (state is FoodGetFoodSuccess) {
+          List<Food> fetchedFoods = state.foods;
+
+          if (currDiningHall.length == 1) {
+            fetchedFoods = fetchedFoods.where((f) => f.diningHalls.contains(currDiningHall.first)).toList();
+
+            final mergedFoods = fetchedFoods
+                .fold<Map<String, Food>>({}, (map, food) {
+                  final key = '${food.name}|${food.dates.first}';
+
+                  if (map.containsKey(key)) {
+                    final existing = map[key]!;
+
+                    map[key] = Food(
+                      id: existing.id,
+                      name: existing.name,
+                      link: existing.link,
+                      servingSize: existing.servingSize,
+                      servingsPerContainer: existing.servingsPerContainer,
+                      caloriesPerServing: existing.caloriesPerServing,
+                      totalFat: existing.totalFat,
+                      saturatedFat: existing.saturatedFat,
+                      transFat: existing.transFat,
+                      totalCarbohydrates: existing.totalCarbohydrates,
+                      dietaryFiber: existing.dietaryFiber,
+                      totalSugars: existing.totalSugars,
+                      addedSugars: existing.addedSugars,
+                      cholesterol: existing.cholesterol,
+                      sodium: existing.sodium,
+                      protein: existing.protein,
+                      diningHalls: food.diningHalls,
+                      mealTypes: {...existing.mealTypes, ...food.mealTypes}.toSet().toList(),
+                      sections: {...existing.sections, ...food.sections}.toSet().toList(),
+                      allergens: existing.allergens,
+                      dates: existing.dates,
+                    );
+                  } else {
+                    map[key] = food;
+                  }
+
+                  return map;
+                })
+                .values
+                .toList();
+
+            fetchedFoods = mergedFoods;
+          }
+
+          setState(() {
+            displayedFood = fetchedFoods.first;
+          });
+        }
+      }, builder: (context, state) {
+        if (state is DiningLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (displayedFood == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return ListView(
+          physics: const ClampingScrollPhysics(),
+          children: [
+            _foodInfoHeader(displayedFood!),
+            _nutritionFactsCard(displayedFood!),
+            _allergenCard(displayedFood!),
+          ],
+        );
+      }),
+    );
+  }
+
+  AppBar _appBar() {
+    return AppBar(
+      title: const Text(
+        "UMD Dining",
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Helvetica',
         ),
-        elevation: 1.0,
-        actions: [
-          IconButton(
-            icon: Icon(
-              isFavorite ? Icons.favorite : Icons.favorite_border,
-              size: 24,
-            ),
-            onPressed: toggleFavorite,
-          ),
-        ],
       ),
-      body: BlocConsumer<DiningBloc, DiningState>(
-        listener: (context, state) {
-          if (state is DiningFailure) {
-            showSnackBar(context, state.error);
-          }
-        },
-        builder: (context, state) {
-          if (state is DiningLoading) {
-            return const Expanded(child: Center(child: CircularProgressIndicator()));
-          }
-          if (state is FoodGetFoodSuccess) {
-            foods = state.foods;
-            if (currDiningHall.length == 1) {
-              foods = foods.where((food) => food.diningHalls.contains(currDiningHall.first)).toList();
-              final mergedFoods = foods
-                  .fold<Map<String, Food>>({}, (map, food) {
-                    final key = '${food.name}|${food.dates.first}';
+      elevation: 1.0,
+      actions: [
+        _favoriteButton(),
+      ],
+    );
+  }
 
-                    if (map.containsKey(key)) {
-                      final existing = map[key]!;
-
-                      map[key] = Food(
-                        id: existing.id,
-                        name: existing.name,
-                        link: existing.link,
-                        servingSize: existing.servingSize,
-                        servingsPerContainer: existing.servingsPerContainer,
-                        caloriesPerServing: existing.caloriesPerServing,
-                        totalFat: existing.totalFat,
-                        saturatedFat: existing.saturatedFat,
-                        transFat: existing.transFat,
-                        totalCarbohydrates: existing.totalCarbohydrates,
-                        dietaryFiber: existing.dietaryFiber,
-                        totalSugars: existing.totalSugars,
-                        addedSugars: existing.addedSugars,
-                        cholesterol: existing.cholesterol,
-                        sodium: existing.sodium,
-                        protein: existing.protein,
-                        diningHalls: food.diningHalls,
-                        mealTypes: {...existing.mealTypes, ...food.mealTypes}.toSet().toList(),
-                        sections: {...existing.sections, ...food.sections}.toSet().toList(),
-                        allergens: existing.allergens,
-                        dates: existing.dates,
-                      );
-                    } else {
-                      map[key] = food;
-                    }
-
-                    return map;
-                  })
-                  .values
-                  .toList();
-              foods = mergedFoods;
-            }
-            final food = foods.first;
-            return ListView(
-              physics: const ClampingScrollPhysics(),
-              children: [
-                _foodInfoHeader(food),
-                _nutritionFactsCard(food),
-                _allergenCard(food),
-              ],
-            );
-          }
-          return const SizedBox();
-        },
+  IconButton _favoriteButton() {
+    return IconButton(
+      icon: Icon(
+        isFavorite ? Icons.favorite : Icons.favorite_border,
+        size: 24,
       ),
+      onPressed: toggleFavorite,
     );
   }
 
@@ -242,7 +258,7 @@ class _FoodPageState extends State<FoodPage> {
                   )),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Row(
             children: [
               const Icon(
@@ -250,18 +266,21 @@ class _FoodPageState extends State<FoodPage> {
                 color: Colors.orangeAccent,
               ),
               const SizedBox(width: 6),
-              Text(food.caloriesPerServing,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  )),
-              const Text(" cal",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20,
-                    // fontWeight: FontWeight.bold,
-                  )),
+              Text(
+                (int.parse(food.caloriesPerServing) * int.parse(food.servingsPerContainer.split(' ').first)).toString(),
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Text(
+                " cal",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Container(width: 2, height: 24, color: Colors.black12),
