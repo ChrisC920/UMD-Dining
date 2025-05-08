@@ -29,9 +29,15 @@ final class FoodGetFoodsByFiltersSuccess extends DiningState {
   FoodGetFoodsByFiltersSuccess(this.foods);
 }
 
-final class AddFavoriteFoodSuccess extends DiningState {}
+final class AddFavoriteFoodSuccess extends DiningState {
+  final int foodId;
+  AddFavoriteFoodSuccess(this.foodId);
+}
 
-final class DeleteFavoriteFoodSuccess extends DiningState {}
+final class DeleteFavoriteFoodSuccess extends DiningState {
+  final int foodId;
+  DeleteFavoriteFoodSuccess(this.foodId);
+}
 
 final class FetchFavoriteFoodsSuccess extends DiningState {
   final List<Food> foods;

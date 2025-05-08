@@ -72,7 +72,7 @@ class Food {
   }
 
   factory Food.fromJson(Map<String, dynamic> json) {
-    //print("look here $json");
+    // print("look here $json");
     final parsedFood = Food(
       id: json['food_id'] ?? 0,
       name: json['foods']?['name'] ?? "Unknown",
@@ -126,6 +126,11 @@ class Food {
       cholesterol: (json['food']?['cholesterol'] ?? "N/A"),
       sodium: (json['food']?['sodium'] ?? "N/A"),
       protein: (json['food']?['protein'] ?? "N/A"),
+      // diningHalls: [],
+      // mealTypes: [],
+      // sections: [],
+      // allergens: [],
+      // dates: [],
       diningHalls: [json['dining_hall']?['name']],
       mealTypes: [json['meal_type']?['name']],
       sections: [json['section']?['name']],
@@ -134,6 +139,8 @@ class Food {
           : [],
       dates: [(json['date']?['date']).toString()],
     );
+    // print("look here ${parsedFood.toString()}");
+
     return parsedFood;
   }
 

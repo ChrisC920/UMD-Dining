@@ -118,8 +118,7 @@ class _FoodPageState extends State<FoodPage> {
         }
         if (state is FoodGetFoodSuccess) {
           foods = state.foods;
-        }
-        if (state is FoodGetFoodSuccess) {
+
           List<Food> fetchedFoods = state.foods;
 
           if (currDiningHall.length == 1) {
@@ -199,11 +198,25 @@ class _FoodPageState extends State<FoodPage> {
           fontSize: 24,
           fontWeight: FontWeight.bold,
           fontFamily: 'Helvetica',
+          color: Colors.white,
+        ),
+      ),
+      backgroundColor: const Color.fromARGB(255, 255, 97, 97),
+      leading: IconButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        icon: const Icon(
+          Icons.arrow_back_ios,
+          color: Colors.white,
         ),
       ),
       elevation: 1.0,
       actions: [
-        _favoriteButton(),
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: _favoriteButton(),
+        ),
       ],
     );
   }
@@ -213,6 +226,7 @@ class _FoodPageState extends State<FoodPage> {
       icon: Icon(
         isFavorite ? Icons.favorite : Icons.favorite_border,
         size: 24,
+        color: Colors.white,
       ),
       onPressed: toggleFavorite,
     );

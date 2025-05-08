@@ -16,8 +16,8 @@ abstract interface class DiningRemoteDataSource {
     List<String>? sections,
     List<String>? allergens,
   });
-  Future<void> addFavoriteFood({required int foodId});
-  Future<void> deleteFavoriteFood({required int foodId});
+  Future<int> addFavoriteFood({required int foodId});
+  Future<int> deleteFavoriteFood({required int foodId});
   Future<List<Food>> fetchFavoriteFoods();
 }
 
@@ -196,7 +196,6 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
           .values
           .toList()
         ..sort((a, b) => a.name.compareTo(b.name));
-
       return uniqueFoods;
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
@@ -277,7 +276,6 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
           .whereType<Food>()
           .toList()
         ..sort((a, b) => a.name.compareTo(b.name));
-      // print(foods);
 
       return foods;
     } on PostgrestException catch (e) {
@@ -311,12 +309,13 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
   }
 
   @override
-  Future<void> addFavoriteFood({required int foodId}) async {
+  Future<int> addFavoriteFood({required int foodId}) async {
     try {
       await supabaseClient.from('user_favorites').upsert({
         'user_id': supabaseClient.auth.currentUser!.id,
         'food_id': foodId,
       }, onConflict: 'user_id, food_id', ignoreDuplicates: true);
+      return foodId;
     } on ServerException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
@@ -325,7 +324,7 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
   }
 
   @override
-  Future<void> deleteFavoriteFood({required int foodId}) async {
+  Future<int> deleteFavoriteFood({required int foodId}) async {
     try {
       final userId = supabaseClient.auth.currentUser?.id;
       if (userId == null) throw Exception("No user logged in");
@@ -334,6 +333,7 @@ class DiningRemoteDataSourceImpl implements DiningRemoteDataSource {
         'user_id': userId,
         'food_id': foodId,
       });
+      return foodId;
     } on ServerException catch (e) {
       throw ServerException(e.message);
     } catch (e) {

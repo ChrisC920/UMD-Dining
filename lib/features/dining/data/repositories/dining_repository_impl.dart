@@ -56,26 +56,26 @@ class DiningRepositoryImpl implements DiningRepository {
   }
 
   @override
-  Future<Either<Failure, void>> addFavoriteFood({required int foodId}) async {
+  Future<Either<Failure, int>> addFavoriteFood({required int foodId}) async {
     try {
       if (!await (connectionChecker.isConnected)) {
         return left(Failure(Constants.noConnectionErrorMessage));
       }
       await diningRemoteDataSource.addFavoriteFood(foodId: foodId);
-      return right(null);
+      return right(foodId);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     }
   }
 
   @override
-  Future<Either<Failure, void>> deleteFavoriteFood({required int foodId}) async {
+  Future<Either<Failure, int>> deleteFavoriteFood({required int foodId}) async {
     try {
       if (!await (connectionChecker.isConnected)) {
         return left(Failure(Constants.noConnectionErrorMessage));
       }
       await diningRemoteDataSource.deleteFavoriteFood(foodId: foodId);
-      return right(null);
+      return right(foodId);
     } on ServerException catch (e) {
       return left(Failure(e.message));
     }
