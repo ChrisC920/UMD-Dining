@@ -61,7 +61,7 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
 
     res.fold(
       (l) => emit(FavoriteFoodsFailure(l.message)),
-      (_) => emit(DeleteFavoriteFoodSuccess()),
+      (r) => emit(DeleteFavoriteFoodSuccess(r)),
     );
   }
 
@@ -75,7 +75,7 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
 
     res.fold(
       (l) => emit(FavoriteFoodsFailure(l.message)),
-      (_) => emit(AddFavoriteFoodSuccess()),
+      (r) => emit(AddFavoriteFoodSuccess(r)),
     );
   }
 

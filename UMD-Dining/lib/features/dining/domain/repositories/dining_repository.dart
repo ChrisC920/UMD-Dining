@@ -15,7 +15,7 @@ abstract interface class DiningRepository {
     DateTime? date,
     List<String>? allergens,
   });
-  Future<Either<Failure, void>> addFavoriteFood({required int foodId});
-  Future<Either<Failure, void>> deleteFavoriteFood({required int foodId});
+  Future<Either<Failure, int>> addFavoriteFood({required int foodId});
+  Future<Either<Failure, int>> deleteFavoriteFood({required int foodId});
   Future<Either<Failure, List<Food>>> fetchFavoriteFoods();
 }

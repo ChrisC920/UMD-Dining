@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:string_similarity/string_similarity.dart';
+import 'package:umd_dining_refactor/config/themes/app_pallete.dart';
+import 'package:umd_dining_refactor/core/constants/constants.dart';
 import 'package:umd_dining_refactor/core/utils/show_snackbar.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
@@ -30,20 +31,25 @@ class _DiningPageState extends State<DiningPage> {
   List<Food> items = [];
   List<Food> searchHistory = [];
   List<Food> favoriteFoods = [];
+  Set<int> localFavoriteIds = {};
   Set<String> selectedMealTypes = <String>{};
   Set<String> selectedAllergens = <String>{};
   Set<String> selectedDietaryPreferences = <String>{};
   DateTime? selectedDate = DateTime.now();
   int currentPageIndex = 1;
+  final ScrollController _scrollController = ScrollController();
+  int visibleItemCount = 20;
 
   @override
   void initState() {
     super.initState();
-    if (currentPageIndex == 1) {
-      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall));
-    } else if (currentPageIndex == 2) {
-      context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
-    }
+    _scrollController.addListener(handleScroll);
+
+    // if (currentPageIndex == 1) {
+    context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall, date: selectedDate));
+    // } else if (currentPageIndex == 2) {
+    context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
+    // }
     setState(() {
       currentPageIndex = 1;
     });
@@ -55,17 +61,27 @@ class _DiningPageState extends State<DiningPage> {
     super.dispose();
     _searchController.removeListener(_filterItems);
     _searchController.dispose();
+    _scrollController.dispose();
+  }
+
+  void handleScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
+      if (visibleItemCount < items.length) {
+        setState(() {
+          visibleItemCount += 20;
+        });
+      }
+    }
   }
 
   void _filterItems() {
     final query = _searchController.text.toLowerCase();
-    // TODO: FIX FILTER BC IT DOESN'T REALLY WORK BY DATE DUE TO MERGING
     setState(() {
+      visibleItemCount = 20;
       items = allItems.where((food) {
         final matchesFilters = selectedMealTypes.every((type) => food.mealTypes.contains(type)) &&
             selectedDietaryPreferences.every((pref) => convertAllergenList(food.allergens).contains(pref)) &&
-            selectedAllergens.every((allergen) => !convertAllergenList(food.allergens).contains(allergen)) &&
-            (selectedDate != null ? food.dates.contains(DateFormat('yyyy-MM-dd').format(selectedDate!)) : true);
+            selectedAllergens.every((allergen) => !convertAllergenList(food.allergens).contains(allergen));
 
         if (query.isEmpty) {
           return matchesFilters; // Show all filtered items if query is empty
@@ -125,7 +141,7 @@ class _DiningPageState extends State<DiningPage> {
       currentPageIndex = index;
     });
     if (index == 1) {
-      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall));
+      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall, date: selectedDate));
     } else if (index == 2) {
       context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
     }
@@ -169,10 +185,18 @@ class _DiningPageState extends State<DiningPage> {
       children: [
         const SizedBox(height: 8),
         Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
           child: _searchBar(context),
         ),
-        _searchResults(),
+        Expanded(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            // onTap: () {
+            //   FocusScope.of(context).unfocus();
+            // },
+            child: _searchResults(),
+          ),
+        ),
       ],
     );
   }
@@ -183,7 +207,7 @@ class _DiningPageState extends State<DiningPage> {
         if (state is FavoriteFoodsFailure) {
           showSnackBar(context, state.error);
         }
-        if (state is FetchFavoriteFoodsSuccess) {
+        if (state is FetchFavoriteFoodsSuccess && currentPageIndex == 2) {
           setState(() {
             favoriteFoods = state.foods;
           });
@@ -197,6 +221,7 @@ class _DiningPageState extends State<DiningPage> {
         if (favoriteFoods.isEmpty) {
           return const Center(child: Text("No foods found."));
         }
+
         return Expanded(
           child: ListView.builder(
             itemCount: favoriteFoods.length > 200 ? 200 : favoriteFoods.length,
@@ -207,7 +232,7 @@ class _DiningPageState extends State<DiningPage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    FoodPage.route(food.id, favoriteFoods, diningHall!, selectedDate, selectedMealTypes),
+                    FoodPage.route(food.id, favoriteFoods, diningHall!, null, selectedMealTypes),
                   );
                 },
               );
@@ -227,32 +252,51 @@ class _DiningPageState extends State<DiningPage> {
         if (state is FoodGetFoodsByFiltersSuccess) {
           setState(() {
             items = state.foods;
-            allItems = List.from(state.foods);
+            allItems = state.foods;
+            // allItems = List.from(state.foods);
             _filterItems();
           });
         }
+        if (state is FetchFavoriteFoodsSuccess) {
+          setState(() {
+            favoriteFoods = state.foods;
+            localFavoriteIds = favoriteFoods.map((f) => f.id).toSet();
+          });
+        }
+        if (state is AddFavoriteFoodSuccess) {
+          localFavoriteIds.add(state.foodId);
+          favoriteFoods.add(allItems.firstWhere((food) => food.id == state.foodId));
+        }
+        if (state is DeleteFavoriteFoodSuccess) {
+          localFavoriteIds.remove(state.foodId);
+          favoriteFoods.removeWhere((food) => food.id == state.foodId);
+        }
       },
       builder: (context, state) {
-        if (state is DiningLoading && items.isEmpty) {
+        if (state is DiningLoading) {
           return const Expanded(child: Center(child: CircularProgressIndicator()));
         }
 
         if (items.isEmpty) {
           return const Center(child: Text("No foods found."));
         }
+
+        final displayedItems = items.take(visibleItemCount).toList();
+
         return Expanded(
-          child: ListView.builder(
-            itemCount: items.length > 200 ? 200 : items.length,
+          child: ListView.separated(
+            separatorBuilder: (context, index) => const Divider(
+              color: Colors.grey,
+              thickness: 1,
+              height: 8,
+            ),
+            controller: _scrollController,
+            itemCount: displayedItems.length,
             itemBuilder: (context, index) {
-              final food = items[index];
-              return ListTile(
-                title: Text(
-                  food.name,
-                  style: const TextStyle(
-                    fontFamily: 'Helvetica',
-                    fontSize: 16,
-                  ),
-                ),
+              final food = displayedItems[index];
+              bool isFavorite = favoriteFoods.any((aFood) => aFood.id == food.id);
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () {
                   context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
 
@@ -261,6 +305,116 @@ class _DiningPageState extends State<DiningPage> {
                     FoodPage.route(food.id, favoriteFoods, diningHall!, selectedDate, selectedMealTypes),
                   );
                 },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Food name wraps if too long
+                          Expanded(
+                            child: Text(
+                              food.name,
+                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                              softWrap: true,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8), // space between text
+                          // Calories aligned right
+                          Row(
+                            children: [
+                              Text(
+                                '${food.caloriesPerServing} cal',
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.local_fire_department,
+                                color: Colors.orangeAccent,
+                                size: 20,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      // Wrap(
+                      //   spacing: 8,
+                      //   runSpacing: 4,
+                      //   children: [
+                      //     ...food.mealTypes.map((meal) => _tagChip(meal)),
+                      //     ...food.allergens.map((allergen) => _tagChip(allergen, isAllergen: true)),
+                      //   ],
+                      // ),
+                      // const SizedBox(height: 8),
+                      // Macros
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Flexible(
+                                  flex: 5,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      'Protein: ${food.protein}',
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                ),
+                                // const SizedBox(width: 6),
+                                Flexible(
+                                  flex: 5,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      'Carbs: ${food.totalCarbohydrates}',
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                ),
+                                Flexible(
+                                  flex: 3,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      'Fat: ${food.totalFat}',
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              localFavoriteIds.contains(food.id) ? Icons.favorite : Icons.favorite_outline,
+                              color: localFavoriteIds.contains(food.id) ? Colors.red : Colors.grey,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                if (localFavoriteIds.contains(food.id)) {
+                                  localFavoriteIds.remove(food.id);
+                                  context.read<DiningBloc>().add(DeleteFavoriteFoodEvent(foodId: food.id));
+                                } else {
+                                  localFavoriteIds.add(food.id);
+                                  context.read<DiningBloc>().add(AddFavoriteFoodEvent(foodId: food.id));
+                                }
+                              });
+                            },
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
           ),
@@ -269,12 +423,44 @@ class _DiningPageState extends State<DiningPage> {
     );
   }
 
+  // Widget _tagChip(String label, {bool isAllergen = false}) {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+  //     decoration: BoxDecoration(
+  //       color: Colors.grey.shade200,
+  //       borderRadius: BorderRadius.circular(20),
+  //     ),
+  //     child: Row(
+  //       mainAxisSize: MainAxisSize.min,
+  //       children: [
+  //         if (isAllergen) const Icon(Icons.warning, size: 14, color: Colors.black54),
+  //         if (isAllergen) const SizedBox(width: 4),
+  //         Text(label, style: const TextStyle(fontSize: 14)),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   SearchBar _searchBar(BuildContext context) {
     return SearchBar(
+      backgroundColor: const WidgetStatePropertyAll(Color(0x00ecf0f1)),
+      shape: WidgetStatePropertyAll(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(
+            style: BorderStyle.solid,
+            color: Colors.grey,
+            width: 0.6,
+          ),
+        ),
+      ),
+      hintStyle: const WidgetStatePropertyAll(TextStyle(fontSize: 16)),
+      elevation: const WidgetStatePropertyAll(0),
+      padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 2)),
       controller: _searchController,
-      hintText: 'Search',
+      hintText: 'Search for food items...',
       leading: IconButton(
-        icon: const Icon(Icons.search),
+        icon: const Icon(Icons.search, color: Colors.grey),
         onPressed: () {},
       ),
       trailing: [
@@ -300,6 +486,9 @@ class _DiningPageState extends State<DiningPage> {
                   selectedDietaryPreferences: selectedDietaryPreferences,
                   selectedDate: selectedDate,
                   onApply: (allergens, mealTypes, dietaryPreferences, date) {
+                    if (date != selectedDate) {
+                      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall, date: selectedDate));
+                    }
                     setState(() {
                       selectedAllergens = allergens;
                       selectedMealTypes = mealTypes;
@@ -319,12 +508,23 @@ class _DiningPageState extends State<DiningPage> {
 
   AppBar _appBar() {
     return AppBar(
+      backgroundColor: AppPallete.mainRed,
       title: const Text(
         "UMD Dining",
         style: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
           fontFamily: 'Helvetica',
+          color: Colors.white,
+        ),
+      ),
+      leading: IconButton(
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        icon: const Icon(
+          Icons.arrow_back_ios,
+          color: Colors.white,
         ),
       ),
       elevation: 1.0,
@@ -332,11 +532,7 @@ class _DiningPageState extends State<DiningPage> {
         Padding(
           padding: const EdgeInsets.only(right: 12),
           child: IconButton(
-            icon: const Icon(
-              Icons.person,
-              size: 24,
-              weight: 24,
-            ),
+            icon: const Icon(Icons.person, size: 24, weight: 24, color: Colors.white),
             onPressed: () {},
           ),
         ),
@@ -351,20 +547,20 @@ class _DiningPageState extends State<DiningPage> {
       indicatorColor: Colors.transparent,
       indicatorShape: const CircleBorder(),
       selectedIndex: currentPageIndex,
-      destinations: [
+      destinations: const [
         NavigationDestination(
-          icon: const Icon(Icons.home, size: 28, color: Colors.grey),
-          selectedIcon: Icon(Icons.home, size: 32, color: Colors.red[200]),
+          icon: Icon(Icons.home, size: 28, color: Colors.grey),
+          selectedIcon: Icon(Icons.home, size: 32, color: AppPallete.mainRed),
           label: 'Home',
         ),
         NavigationDestination(
-          icon: const Icon(Icons.search, size: 28, color: Colors.grey),
-          selectedIcon: Icon(Icons.search, size: 32, color: Colors.red[200]),
+          icon: Icon(Icons.search, size: 28, color: Colors.grey),
+          selectedIcon: Icon(Icons.search, size: 32, color: AppPallete.mainRed),
           label: 'Search',
         ),
         NavigationDestination(
-          icon: const Icon(Icons.favorite, size: 28, color: Colors.grey),
-          selectedIcon: Icon(Icons.favorite, size: 32, color: Colors.red[200]),
+          icon: Icon(Icons.favorite, size: 28, color: Colors.grey),
+          selectedIcon: Icon(Icons.favorite, size: 32, color: AppPallete.mainRed),
           label: 'Favorites',
         ),
       ],

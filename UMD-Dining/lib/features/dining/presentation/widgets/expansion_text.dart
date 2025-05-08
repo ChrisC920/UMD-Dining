@@ -6,6 +6,7 @@ class ExpandableTextRow extends StatefulWidget {
   final Widget dropdown;
 
   @override
+  // ignore: library_private_types_in_public_api
   _ExpandableTextRowState createState() => _ExpandableTextRowState();
 }
 
