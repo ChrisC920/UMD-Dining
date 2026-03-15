@@ -1,0 +1,1 @@
+ /Users/chris/umd_dining/UMD-Dining/.dart_tool/flutter_build/b71a3a88a8b949c2dcb2cc48419fb507/native_assets.json: 
