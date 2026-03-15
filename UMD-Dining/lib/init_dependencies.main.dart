@@ -3,47 +3,31 @@ part of 'init_dependencies.dart';
 final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
-  _initAuth();
-  _initDining();
-
-  final supabase = await Supabase.initialize(
-    url: AppSecrets.supabaseUrl,
-    anonKey: AppSecrets.supabaseAnonKey,
-  );
-
-  Hive.defaultDirectory = (await getApplicationDocumentsDirectory()).path;
-
-  serviceLocator.registerLazySingleton(() => supabase.client);
-
-  serviceLocator.registerLazySingleton(
-    () => Hive.box(name: 'foods'),
-  );
-
-  serviceLocator.registerFactory(() => InternetConnection());
+  // Initialize ConvexClient singleton (must be called before use)
+  await ConvexClient.initialize(const ConvexConfig(
+    deploymentUrl: Constants.convexUrl,
+    clientId: 'umd-dining',
+  ));
 
   // core
-  serviceLocator.registerLazySingleton(
-    () => AppUserCubit(),
-  );
+  serviceLocator.registerLazySingleton(() => AppUserCubit());
   serviceLocator.registerFactory<ConnectionChecker>(
-    () => ConnectionCheckerImpl(
-      serviceLocator(),
-    ),
+    () => const ConnectionCheckerImpl(),
   );
+
+  _initAuth();
+  _initDining();
 }
 
 void _initAuth() {
   // Datasource
   serviceLocator
     ..registerFactory<AuthRemoteDataSource>(
-      () => AuthRemoteDataSourceImpl(
-        serviceLocator(),
-      ),
+      () => AuthRemoteDataSourceImpl(ConvexClient.instance),
     )
     // Repository
     ..registerFactory<AuthRepository>(
       () => AuthRepositoryImpl(
-        serviceLocator(),
         serviceLocator(),
       ),
     )
@@ -102,9 +86,7 @@ void _initDining() {
   // Datasource
   serviceLocator
     ..registerFactory<DiningRemoteDataSource>(
-      () => DiningRemoteDataSourceImpl(
-        serviceLocator(),
-      ),
+      () => DiningRemoteDataSourceImpl(ConvexClient.instance),
     )
     // ..registerFactory<DiningLocalDataSource>(
     //   () => DiningLocalDataSourceImpl(serviceLocator()),
@@ -114,8 +96,6 @@ void _initDining() {
     ..registerFactory<DiningRepository>(
       () => DiningRepositoryImpl(
         serviceLocator(),
-        serviceLocator(),
-        // serviceLocator(),
       ),
     )
     // Usecases

@@ -1,13 +1,15 @@
+import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:string_similarity/string_similarity.dart';
 import 'package:umd_dining_refactor/config/themes/app_pallete.dart';
-import 'package:umd_dining_refactor/core/constants/constants.dart';
+
 import 'package:umd_dining_refactor/core/utils/show_snackbar.dart';
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/bloc/dining_bloc.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/pages/food_page.dart';
 import 'package:umd_dining_refactor/features/dining/presentation/widgets/filter_card.dart';
+import 'package:umd_dining_refactor/features/dining/presentation/widgets/home_page_content.dart';
 
 class DiningPage extends StatefulWidget {
   static route(List<String>? diningHall) => MaterialPageRoute(
@@ -31,12 +33,12 @@ class _DiningPageState extends State<DiningPage> {
   List<Food> items = [];
   List<Food> searchHistory = [];
   List<Food> favoriteFoods = [];
-  Set<int> localFavoriteIds = {};
+  Set<String> localFavoriteIds = {};
   Set<String> selectedMealTypes = <String>{};
   Set<String> selectedAllergens = <String>{};
   Set<String> selectedDietaryPreferences = <String>{};
   DateTime? selectedDate = DateTime.now();
-  int currentPageIndex = 1;
+  int currentPageIndex = 0;
   final ScrollController _scrollController = ScrollController();
   int visibleItemCount = 20;
 
@@ -44,16 +46,14 @@ class _DiningPageState extends State<DiningPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(handleScroll);
-
-    // if (currentPageIndex == 1) {
-    context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall, date: selectedDate));
-    // } else if (currentPageIndex == 2) {
-    context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
-    // }
-    setState(() {
-      currentPageIndex = 1;
-    });
     _searchController.addListener(_filterItems);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall, date: selectedDate));
+      final clerkId = ClerkAuth.of(context).client.activeSession?.user.id ?? '';
+      context.read<DiningBloc>().add(FetchFavoriteFoodsEvent(clerkId: clerkId));
+    });
   }
 
   @override
@@ -143,32 +143,85 @@ class _DiningPageState extends State<DiningPage> {
     if (index == 1) {
       context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall, date: selectedDate));
     } else if (index == 2) {
-      context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
+      final clerkId = ClerkAuth.of(context).client.activeSession?.user.id ?? '';
+      context.read<DiningBloc>().add(FetchFavoriteFoodsEvent(clerkId: clerkId));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: _bottomNavBar(),
-      appBar: _appBar(),
-      body: SafeArea(
-        child: <Widget>[
-          _homePage(),
-          _searchPage(context),
-          _favoritesPage(),
-        ][currentPageIndex],
+    return BlocListener<DiningBloc, DiningState>(
+      listener: (context, state) {
+        if (state is DiningFailure) {
+          showSnackBar(context, state.error);
+        }
+        if (state is FavoriteFoodsFailure) {
+          showSnackBar(context, state.error);
+        }
+        if (state is FoodGetFoodsByFiltersSuccess) {
+          setState(() {
+            allItems = state.foods;
+            items = state.foods;
+            _filterItems();
+          });
+        }
+        if (state is FetchFavoriteFoodsSuccess) {
+          setState(() {
+            favoriteFoods = state.foods;
+            localFavoriteIds = favoriteFoods.map((f) => f.id).toSet();
+          });
+        }
+        if (state is AddFavoriteFoodSuccess) {
+          setState(() {
+            localFavoriteIds.add(state.foodId);
+            final food = allItems.firstWhere(
+              (f) => f.id == state.foodId,
+              orElse: () => favoriteFoods.firstWhere((f) => f.id == state.foodId, orElse: Food.empty),
+            );
+            if (food.id.isNotEmpty) favoriteFoods.add(food);
+          });
+        }
+        if (state is DeleteFavoriteFoodSuccess) {
+          setState(() {
+            localFavoriteIds.remove(state.foodId);
+            favoriteFoods.removeWhere((f) => f.id == state.foodId);
+          });
+        }
+      },
+      child: Scaffold(
+        bottomNavigationBar: _bottomNavBar(),
+        appBar: _appBar(),
+        body: SafeArea(
+          child: <Widget>[
+            _homePage(),
+            _searchPage(context),
+            _favoritesPage(),
+          ][currentPageIndex],
+        ),
       ),
     );
   }
 
-  Center _homePage() {
-    return Center(
-      child: Container(
-        width: 100,
-        height: 100,
-        color: Colors.green,
-      ),
+  Widget _homePage() {
+    return HomePageContent(
+      diningHall: diningHall,
+      allFoods: allItems,
+      favoriteFoods: favoriteFoods,
+      localFavoriteIds: localFavoriteIds,
+      selectedDate: selectedDate,
+      onNavigate: updatePage,
+      onToggleFavorite: (foodId, isFav) {
+        final clerkId = ClerkAuth.of(context).client.activeSession?.user.id ?? '';
+        setState(() {
+          if (isFav) {
+            localFavoriteIds.remove(foodId);
+            context.read<DiningBloc>().add(DeleteFavoriteFoodEvent(clerkId: clerkId, foodId: foodId));
+          } else {
+            localFavoriteIds.add(foodId);
+            context.read<DiningBloc>().add(AddFavoriteFoodEvent(clerkId: clerkId, foodId: foodId));
+          }
+        });
+      },
     );
   }
 
@@ -201,18 +254,8 @@ class _DiningPageState extends State<DiningPage> {
     );
   }
 
-  BlocConsumer<DiningBloc, DiningState> _favoriteFoodResults() {
-    return BlocConsumer<DiningBloc, DiningState>(
-      listener: (context, state) {
-        if (state is FavoriteFoodsFailure) {
-          showSnackBar(context, state.error);
-        }
-        if (state is FetchFavoriteFoodsSuccess && currentPageIndex == 2) {
-          setState(() {
-            favoriteFoods = state.foods;
-          });
-        }
-      },
+  BlocBuilder<DiningBloc, DiningState> _favoriteFoodResults() {
+    return BlocBuilder<DiningBloc, DiningState>(
       builder: (context, state) {
         if (state is FavoriteFoodsLoading && items.isEmpty) {
           return const Expanded(child: Center(child: CircularProgressIndicator())); // Show loading only when empty
@@ -232,7 +275,7 @@ class _DiningPageState extends State<DiningPage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    FoodPage.route(food.id, favoriteFoods, diningHall!, null, selectedMealTypes),
+                    FoodPage.route(food.id, favoriteFoods, diningHall ?? [], null, selectedMealTypes),
                   );
                 },
               );
@@ -243,35 +286,8 @@ class _DiningPageState extends State<DiningPage> {
     );
   }
 
-  BlocConsumer<DiningBloc, DiningState> _searchResults() {
-    return BlocConsumer<DiningBloc, DiningState>(
-      listener: (context, state) {
-        if (state is DiningFailure) {
-          showSnackBar(context, state.error);
-        }
-        if (state is FoodGetFoodsByFiltersSuccess) {
-          setState(() {
-            items = state.foods;
-            allItems = state.foods;
-            // allItems = List.from(state.foods);
-            _filterItems();
-          });
-        }
-        if (state is FetchFavoriteFoodsSuccess) {
-          setState(() {
-            favoriteFoods = state.foods;
-            localFavoriteIds = favoriteFoods.map((f) => f.id).toSet();
-          });
-        }
-        if (state is AddFavoriteFoodSuccess) {
-          localFavoriteIds.add(state.foodId);
-          favoriteFoods.add(allItems.firstWhere((food) => food.id == state.foodId));
-        }
-        if (state is DeleteFavoriteFoodSuccess) {
-          localFavoriteIds.remove(state.foodId);
-          favoriteFoods.removeWhere((food) => food.id == state.foodId);
-        }
-      },
+  BlocBuilder<DiningBloc, DiningState> _searchResults() {
+    return BlocBuilder<DiningBloc, DiningState>(
       builder: (context, state) {
         if (state is DiningLoading) {
           return const Expanded(child: Center(child: CircularProgressIndicator()));
@@ -294,15 +310,15 @@ class _DiningPageState extends State<DiningPage> {
             itemCount: displayedItems.length,
             itemBuilder: (context, index) {
               final food = displayedItems[index];
-              bool isFavorite = favoriteFoods.any((aFood) => aFood.id == food.id);
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
-                  context.read<DiningBloc>().add(FetchFavoriteFoodsEvent());
+                  final clerkId = ClerkAuth.of(context).client.activeSession?.user.id ?? '';
+                  context.read<DiningBloc>().add(FetchFavoriteFoodsEvent(clerkId: clerkId));
 
                   Navigator.push(
                     context,
-                    FoodPage.route(food.id, favoriteFoods, diningHall!, selectedDate, selectedMealTypes),
+                    FoodPage.route(food.id, favoriteFoods, diningHall ?? [], selectedDate, selectedMealTypes),
                   );
                 },
                 child: Padding(
@@ -399,13 +415,14 @@ class _DiningPageState extends State<DiningPage> {
                               color: localFavoriteIds.contains(food.id) ? Colors.red : Colors.grey,
                             ),
                             onPressed: () {
+                              final clerkId = ClerkAuth.of(context).client.activeSession?.user.id ?? '';
                               setState(() {
                                 if (localFavoriteIds.contains(food.id)) {
                                   localFavoriteIds.remove(food.id);
-                                  context.read<DiningBloc>().add(DeleteFavoriteFoodEvent(foodId: food.id));
+                                  context.read<DiningBloc>().add(DeleteFavoriteFoodEvent(clerkId: clerkId, foodId: food.id));
                                 } else {
                                   localFavoriteIds.add(food.id);
-                                  context.read<DiningBloc>().add(AddFavoriteFoodEvent(foodId: food.id));
+                                  context.read<DiningBloc>().add(AddFavoriteFoodEvent(clerkId: clerkId, foodId: food.id));
                                 }
                               });
                             },
@@ -486,15 +503,16 @@ class _DiningPageState extends State<DiningPage> {
                   selectedDietaryPreferences: selectedDietaryPreferences,
                   selectedDate: selectedDate,
                   onApply: (allergens, mealTypes, dietaryPreferences, date) {
-                    if (date != selectedDate) {
-                      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall, date: selectedDate));
-                    }
+                    final dateChanged = date != selectedDate;
                     setState(() {
                       selectedAllergens = allergens;
                       selectedMealTypes = mealTypes;
                       selectedDietaryPreferences = dietaryPreferences;
                       selectedDate = date;
                     });
+                    if (dateChanged) {
+                      context.read<DiningBloc>().add(FoodFetchFoodsByFilters(diningHalls: diningHall, date: date));
+                    }
                     _filterItems();
                   },
                 );

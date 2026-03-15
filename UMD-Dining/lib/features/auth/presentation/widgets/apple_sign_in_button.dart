@@ -1,12 +1,9 @@
+import 'package:clerk_auth/clerk_auth.dart' as clerk;
+import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:umd_dining_refactor/features/auth/presentation/bloc/auth_bloc.dart'
-    as auth_bloc;
 
 class AppleSignInButton extends StatelessWidget {
-  const AppleSignInButton({
-    super.key,
-  });
+  const AppleSignInButton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,16 +11,12 @@ class AppleSignInButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: ElevatedButton(
         onPressed: () {
-          context.read<auth_bloc.AuthBloc>().add(
-                auth_bloc.AuthSignUpApple(),
-              );
+          ClerkAuth.of(context).ssoSignIn(context, clerk.Strategy.oauthApple);
         },
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(75),
           backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

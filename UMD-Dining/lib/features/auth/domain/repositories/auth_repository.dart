@@ -1,3 +1,4 @@
+import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:umd_dining_refactor/core/errors/failures.dart';
 import 'package:umd_dining_refactor/core/common/entities/user.dart';
 import 'package:fpdart/fpdart.dart';
@@ -18,7 +19,7 @@ abstract interface class AuthRepository {
 
   Future<Either<Failure, User>> loginWithAppleOAuth();
 
-  Future<Either<Failure, User>> currentUser();
+  Future<Either<Failure, User>> currentUser(ClerkAuthState authState);
 
   Future<Either<Failure, User>> updateUserPreferences(
     UserPreferencesParams params,

@@ -14,7 +14,7 @@ import 'package:umd_dining_refactor/features/auth/presentation/pages/onboarding_
 import 'package:umd_dining_refactor/features/auth/presentation/widgets/apple_sign_in_button.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/widgets/google_sign_in_button.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/widgets/horizontal_scroll.dart';
-import 'package:umd_dining_refactor/features/dining/presentation/pages/start_page.dart';
+import 'package:umd_dining_refactor/features/dining/presentation/pages/main_shell.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SignInPage extends StatefulWidget {
@@ -85,7 +85,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
 
                           Navigator.pushAndRemoveUntil(
                             context,
-                            StartPage.route(),
+                            MainShell.route(),
                             (route) => false,
                           );
                         } else if (state is AuthNewUser) {
@@ -281,7 +281,7 @@ class BackgroundCard extends StatelessWidget {
               child: Container(
                 // height: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.red.shade400.withOpacity(0.3), // Adjust opacity for the glass effect
+                  color: Colors.red.shade400.withValues(alpha: 0.3), // Adjust opacity for the glass effect
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(45),
                     topRight: Radius.circular(45),

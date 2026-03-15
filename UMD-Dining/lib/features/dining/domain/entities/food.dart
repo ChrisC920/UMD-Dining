@@ -1,5 +1,5 @@
 class Food {
-  final int id;
+  final String id;
   final String name;
   final String link;
   final String servingSize;
@@ -47,7 +47,7 @@ class Food {
 
   factory Food.empty() {
     return Food(
-      id: 0,
+      id: '',
       name: '',
       link: '',
       servingSize: '',
@@ -74,7 +74,7 @@ class Food {
   factory Food.fromJson(Map<String, dynamic> json) {
     // print("look here $json");
     final parsedFood = Food(
-      id: json['food_id'] ?? 0,
+      id: (json['food_id'] ?? '').toString(),
       name: json['foods']?['name'] ?? "Unknown",
       link: json['foods']?['link'] ?? "No URL Found",
       servingSize: json['foods']?['serving_size'] ?? "N/A",
@@ -110,7 +110,7 @@ class Food {
 
   factory Food.fromJsonAlt(Map<String, dynamic> json) {
     final parsedFood = Food(
-      id: json['food_id'] ?? 0,
+      id: (json['food_id'] ?? '').toString(),
       name: json['food']?['name'] ?? "Unknown",
       link: json['food']?['link'] ?? "No URL Found",
       servingSize: json['food']?['serving_size'] ?? "N/A",
@@ -142,6 +142,62 @@ class Food {
     // print("look here ${parsedFood.toString()}");
 
     return parsedFood;
+  }
+
+  /// Parses a food item from getFoodsByFilters Convex response.
+  /// Each item has flat camelCase fields plus allergen/relation strings.
+  factory Food.fromConvex(Map<String, dynamic> json) {
+    return Food(
+      id: (json['_id'] ?? '').toString(),
+      name: (json['name'] ?? 'Unknown') as String,
+      link: (json['link'] ?? '') as String,
+      servingSize: (json['servingSize'] ?? 'N/A') as String,
+      servingsPerContainer: (json['servingsPerContainer'] ?? 'N/A') as String,
+      caloriesPerServing: (json['caloriesPerServing'] ?? 'N/A') as String,
+      totalFat: (json['totalFat'] ?? 'N/A') as String,
+      saturatedFat: (json['saturatedFat'] ?? 'N/A') as String,
+      transFat: (json['transFat'] ?? 'N/A') as String,
+      totalCarbohydrates: (json['totalCarbohydrates'] ?? 'N/A') as String,
+      dietaryFiber: (json['dietaryFiber'] ?? 'N/A') as String,
+      totalSugars: (json['totalSugars'] ?? 'N/A') as String,
+      addedSugars: (json['addedSugars'] ?? 'N/A') as String,
+      cholesterol: (json['cholesterol'] ?? 'N/A') as String,
+      sodium: (json['sodium'] ?? 'N/A') as String,
+      protein: (json['protein'] ?? 'N/A') as String,
+      allergens: List<String>.from((json['allergens'] as List?)?.map((e) => e.toString()) ?? []),
+      diningHalls: json['diningHall'] != null ? [json['diningHall'] as String] : [],
+      mealTypes: json['mealType'] != null ? [json['mealType'] as String] : [],
+      sections: json['section'] != null ? [json['section'] as String] : [],
+      dates: json['date'] != null ? [json['date'] as String] : [],
+    );
+  }
+
+  /// Parses a food item from getFoodById Convex response.
+  /// Has diningHalls/mealTypes/sections/dates as lists.
+  factory Food.fromConvexDetail(Map<String, dynamic> json) {
+    return Food(
+      id: (json['_id'] ?? '').toString(),
+      name: (json['name'] ?? 'Unknown') as String,
+      link: (json['link'] ?? '') as String,
+      servingSize: (json['servingSize'] ?? 'N/A') as String,
+      servingsPerContainer: (json['servingsPerContainer'] ?? 'N/A') as String,
+      caloriesPerServing: (json['caloriesPerServing'] ?? 'N/A') as String,
+      totalFat: (json['totalFat'] ?? 'N/A') as String,
+      saturatedFat: (json['saturatedFat'] ?? 'N/A') as String,
+      transFat: (json['transFat'] ?? 'N/A') as String,
+      totalCarbohydrates: (json['totalCarbohydrates'] ?? 'N/A') as String,
+      dietaryFiber: (json['dietaryFiber'] ?? 'N/A') as String,
+      totalSugars: (json['totalSugars'] ?? 'N/A') as String,
+      addedSugars: (json['addedSugars'] ?? 'N/A') as String,
+      cholesterol: (json['cholesterol'] ?? 'N/A') as String,
+      sodium: (json['sodium'] ?? 'N/A') as String,
+      protein: (json['protein'] ?? 'N/A') as String,
+      allergens: List<String>.from((json['allergens'] as List?)?.map((e) => e.toString()) ?? []),
+      diningHalls: List<String>.from((json['diningHalls'] as List?)?.map((e) => e.toString()) ?? []),
+      mealTypes: List<String>.from((json['mealTypes'] as List?)?.map((e) => e.toString()) ?? []),
+      sections: List<String>.from((json['sections'] as List?)?.map((e) => e.toString()) ?? []),
+      dates: List<String>.from((json['dates'] as List?)?.map((e) => e.toString()) ?? []),
+    );
   }
 
   @override

@@ -8,7 +8,7 @@ import 'package:umd_dining_refactor/core/common/widgets/loader.dart';
 import 'package:umd_dining_refactor/core/constants/constants.dart';
 import 'package:umd_dining_refactor/features/auth/data/models/preferences_model.dart';
 import 'package:umd_dining_refactor/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:umd_dining_refactor/features/dining/presentation/pages/start_page.dart';
+import 'package:umd_dining_refactor/features/dining/presentation/pages/main_shell.dart';
 
 class OnboardingPage extends StatefulWidget {
   static route(String id) => MaterialPageRoute(
@@ -77,11 +77,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
             userId: userId,
             preferences: preferences.preferences,
           ));
-      context.read<AuthBloc>().add(UpdateUserProfileEvent(
-            userId: userId,
-            age: selectedAge,
-          ));
-      Navigator.pushAndRemoveUntil(context, StartPage.route(), (route) => false);
+      // Profile update deferred (not yet implemented)
+      Navigator.pushAndRemoveUntil(context, MainShell.route(), (route) => false);
     }
   }
 
@@ -112,7 +109,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           } else if (state is AuthSuccess) {
             Navigator.pushAndRemoveUntil(
               context,
-              StartPage.route(),
+              MainShell.route(),
               (route) => false,
             );
           }

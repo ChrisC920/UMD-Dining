@@ -30,12 +30,12 @@ final class FoodGetFoodsByFiltersSuccess extends DiningState {
 }
 
 final class AddFavoriteFoodSuccess extends DiningState {
-  final int foodId;
+  final String foodId;
   AddFavoriteFoodSuccess(this.foodId);
 }
 
 final class DeleteFavoriteFoodSuccess extends DiningState {
-  final int foodId;
+  final String foodId;
   DeleteFavoriteFoodSuccess(this.foodId);
 }
 

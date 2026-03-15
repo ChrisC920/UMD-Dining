@@ -4,7 +4,7 @@ import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 
 abstract interface class DiningRepository {
   Future<Either<Failure, List<Food>>> getFoodById({
-    required int id,
+    required String id,
     String? diningHall,
     DateTime? date,
   });
@@ -15,7 +15,7 @@ abstract interface class DiningRepository {
     DateTime? date,
     List<String>? allergens,
   });
-  Future<Either<Failure, int>> addFavoriteFood({required int foodId});
-  Future<Either<Failure, int>> deleteFavoriteFood({required int foodId});
-  Future<Either<Failure, List<Food>>> fetchFavoriteFoods();
+  Future<Either<Failure, String>> addFavoriteFood({required String clerkId, required String foodId});
+  Future<Either<Failure, String>> deleteFavoriteFood({required String clerkId, required String foodId});
+  Future<Either<Failure, List<Food>>> fetchFavoriteFoods({required String clerkId});
 }

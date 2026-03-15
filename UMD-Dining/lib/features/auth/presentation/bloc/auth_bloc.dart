@@ -1,3 +1,4 @@
+import 'package:clerk_flutter/clerk_flutter.dart';
 import 'package:umd_dining_refactor/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:umd_dining_refactor/core/usecases/usecase.dart';
 import 'package:umd_dining_refactor/core/common/entities/user.dart';
@@ -42,7 +43,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _updateUserPreferencesUseCase = updateUserPreferences,
         _updateUserProfile = updateUserProfile,
         super(AuthInitial()) {
-    on<AuthEvent>((_, emit) => emit(AuthLoading()));
     on<AuthSignUpEmail>(_onAuthSignUpEmail);
     on<AuthSignUpGoogle>(_onAuthSignUpGoogle);
     on<AuthSignUpApple>(_onAuthSignUpApple);
@@ -56,7 +56,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthIsUserLoggedIn event,
     Emitter<AuthState> emit,
   ) async {
-    final res = await _currentUser(NoParams());
+    final res = await _currentUser(event.authState);
 
     res.fold(
       (l) => emit(AuthFailure(l.message)),

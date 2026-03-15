@@ -20,7 +20,7 @@ final class FoodFetchFoodsByFilters extends DiningEvent {
 }
 
 final class FoodFetchFoodDetails extends DiningEvent {
-  final int id;
+  final String id;
   final String? diningHall;
   final DateTime? date;
 
@@ -32,19 +32,20 @@ final class FoodFetchFoodDetails extends DiningEvent {
 }
 
 final class AddFavoriteFoodEvent extends DiningEvent {
-  final int foodId;
+  final String clerkId;
+  final String foodId;
 
-  AddFavoriteFoodEvent({
-    required this.foodId,
-  });
+  AddFavoriteFoodEvent({required this.clerkId, required this.foodId});
 }
 
 final class DeleteFavoriteFoodEvent extends DiningEvent {
-  final int foodId;
+  final String clerkId;
+  final String foodId;
 
-  DeleteFavoriteFoodEvent({
-    required this.foodId,
-  });
+  DeleteFavoriteFoodEvent({required this.clerkId, required this.foodId});
 }
 
-final class FetchFavoriteFoodsEvent extends DiningEvent {}
+final class FetchFavoriteFoodsEvent extends DiningEvent {
+  final String clerkId;
+  FetchFavoriteFoodsEvent({required this.clerkId});
+}

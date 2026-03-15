@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_moving_background/components/moving_circle.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Constants {
   static const noConnectionErrorMessage = 'Not connected to a network!';
-  static final supabase = Supabase.instance.client;
+
+  // Convex deployment URL — set via --dart-define=CONVEX_URL=... or update the defaultValue
+  static const convexUrl = String.fromEnvironment(
+    'CONVEX_URL',
+    defaultValue: 'https://acoustic-ocelot-634.convex.cloud',
+  );
+
   static const List<String> mealTypes = [
     'Breakfast',
     'Lunch',
     'Dinner',
     'Brunch',
-  ];
-
-  static const List<String> databases = [
-    'food_modified',
-    'food_today',
-    'food',
   ];
 
   static const List<String> allergens = [

@@ -20,11 +20,11 @@ class StartPage extends StatelessWidget {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: () => {
+              onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const DiningPage(diningHall: ['251 North'])),
-                ),
+                );
               },
               child: Stack(
                 fit: StackFit.expand,
@@ -47,11 +47,11 @@ class StartPage extends StatelessWidget {
           ),
           Expanded(
             child: GestureDetector(
-              onTap: () => {
+              onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const DiningPage(diningHall: ['Yahentamitsi'])),
-                ),
+                );
               },
               child: Stack(
                 fit: StackFit.expand,
@@ -74,11 +74,11 @@ class StartPage extends StatelessWidget {
           ),
           Expanded(
             child: GestureDetector(
-              onTap: () => {
+              onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const DiningPage(diningHall: ['South'])),
-                ),
+                );
               },
               child: Stack(
                 fit: StackFit.expand,

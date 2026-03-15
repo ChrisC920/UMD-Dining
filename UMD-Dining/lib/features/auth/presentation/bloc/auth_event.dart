@@ -1,11 +1,15 @@
 part of 'auth_bloc.dart';
 
+// ignore: depend_on_referenced_packages
+// ClerkAuthState is imported via auth_bloc.dart
+
 abstract class AuthEvent extends Equatable {
   const AuthEvent();
 
   @override
   List<Object> get props => [];
 }
+
 
 final class AuthSignUpEmail extends AuthEvent {
   final String email;
@@ -56,4 +60,10 @@ final class AuthSignUpGoogle extends AuthEvent {}
 
 final class AuthSignUpApple extends AuthEvent {}
 
-final class AuthIsUserLoggedIn extends AuthEvent {}
+final class AuthIsUserLoggedIn extends AuthEvent {
+  final ClerkAuthState authState;
+  const AuthIsUserLoggedIn(this.authState);
+
+  @override
+  List<Object> get props => [authState];
+}

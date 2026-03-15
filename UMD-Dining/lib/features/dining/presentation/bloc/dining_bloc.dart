@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:umd_dining_refactor/core/usecases/usecase.dart';
+
 import 'package:umd_dining_refactor/features/dining/domain/entities/food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/add_favorite_food.dart';
 import 'package:umd_dining_refactor/features/dining/domain/usecases/delete_favorite_food.dart';
@@ -29,7 +29,6 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
         _deleteFavoriteFood = deleteFavoriteFood,
         _fetchFavoriteFoods = fetchFavoriteFoods,
         super(DiningInitial()) {
-    on<DiningEvent>((event, emit) => emit(DiningLoading()));
     on<FoodFetchFoodDetails>(_onFetchFoodDetails);
     on<FoodFetchFoodsByFilters>(_onFetchFoodsByFilters);
     on<AddFavoriteFoodEvent>(_onAddFavoriteFood);
@@ -43,7 +42,7 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
   ) async {
     emit(FavoriteFoodsLoading());
 
-    final res = await _fetchFavoriteFoods(NoParams());
+    final res = await _fetchFavoriteFoods(event.clerkId);
 
     res.fold(
       (l) => emit(FavoriteFoodsFailure(l.message)),
@@ -57,7 +56,7 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
   ) async {
     emit(FavoriteFoodsLoading());
 
-    final res = await _deleteFavoriteFood(DeleteFavoriteFoodParams(event.foodId));
+    final res = await _deleteFavoriteFood(DeleteFavoriteFoodParams(clerkId: event.clerkId, foodId: event.foodId));
 
     res.fold(
       (l) => emit(FavoriteFoodsFailure(l.message)),
@@ -71,7 +70,7 @@ class DiningBloc extends Bloc<DiningEvent, DiningState> {
   ) async {
     emit(FavoriteFoodsLoading());
 
-    final res = await _addFavoriteFood(AddFavoriteFoodParams(event.foodId));
+    final res = await _addFavoriteFood(AddFavoriteFoodParams(clerkId: event.clerkId, foodId: event.foodId));
 
     res.fold(
       (l) => emit(FavoriteFoodsFailure(l.message)),

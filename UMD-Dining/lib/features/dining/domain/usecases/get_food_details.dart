@@ -18,7 +18,7 @@ class GetFoodDetails {
 }
 
 class GetFoodDetailsParams {
-  final int id;
+  final String id;
   final String? diningHall;
   final DateTime? date;
 
