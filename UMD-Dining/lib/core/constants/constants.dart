@@ -4,11 +4,8 @@ import 'package:flutter_moving_background/components/moving_circle.dart';
 class Constants {
   static const noConnectionErrorMessage = 'Not connected to a network!';
 
-  // Convex deployment URL — set via --dart-define=CONVEX_URL=... or update the defaultValue
-  static const convexUrl = String.fromEnvironment(
-    'CONVEX_URL',
-    defaultValue: 'https://acoustic-ocelot-634.convex.cloud',
-  );
+  // Convex deployment URL — must be set via --dart-define=CONVEX_URL=... or dart_defines.json
+  static const convexUrl = String.fromEnvironment('CONVEX_URL');
 
   static const List<String> mealTypes = [
     'Breakfast',

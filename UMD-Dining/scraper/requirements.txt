@@ -1,0 +1,6 @@
+convex
+itemadapter==0.9.0
+python-dotenv==1.0.1
+Scrapy==2.11.1
+setuptools==75.0.0
+pytz~=2024.2
